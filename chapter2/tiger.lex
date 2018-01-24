@@ -24,7 +24,7 @@ void adjust(void)
  const int plen = 100;
  void str_init(){
    str = checked_malloc(plen);
-   mlem = plen;
+   mlen = plen;
    str[0]='\0';
    len = 0;
  }
@@ -42,34 +42,45 @@ void adjust(void)
  }
 %}
 
-%x STR COMMENTS
+%x STR COMMENTS VSTR
 %%
 <COMMENTS>{
-  ("*/")+  {adjust(); BEGIN(0);}
-  <<EOF>>  {adjust(); EM_error(EM_TokPos,"EOF in comment");return 0;}
+  "*/"  {adjust(); BEGIN(0);}
+  <<EOF>>  {adjust(); EM_error(EM_tokPos,"EOF in comment");return 0;}
   \n  {adjust(); EM_newline();continue;}
   . {adjust();}
 }
 
 <STR>{
   \"  {adjust();BEGIN(0);yylval.sval = String(str);return STRING;}
-  "\n"  {adjust(); str_add('\n');}
-  "\t"  {adjust(); str_add('\t');}
-  \\^[a-zA-Z]  {adjust();}
-  \\[0-9]{3}  {adjust(); str_add(atoi(yytext+1));}
-  "\""  {adjust(); str_add('\"');}
-  \\  {adjust(); std_add('\\');}
-  \\[^ntf\"\\]
-  \\.*\\ {adjust();}
+  \\n  {adjust(); str_add('\n'); continue;}
+  \\t  {adjust(); str_add('\t'); continue;}
+  \^[A-Z] {adjust(); continue;} // to do
+  \\[0-9]{3}  {adjust(); str_add(atoi(yytext+1)); continue;}
+  \\\"  {adjust(); str_add('\"'); continue;}
+  \\  {adjust(); str_add('\\'); continue;}
+  \\f  {adjust(); BEGIN(VSTR);}
+  \\^[ntf\"\\] {adjust(); EM_error(EM_tokPos,"no such control characters");return 0;}
 
 }
+
+<VSTR>{
+  f\\ {adjust(); BEGIN(STR);}
+  \n {adjust(); EM_newline(); continue;}
+  \t {adjust(); continue;}
+  \f {adjust(); continue;}
+  . {adjust(); EM_error(EM_tokPos, "not formatting characters"); return 0;}
+ }
 
 "/*" {adjust();BEGIN(COMMENTS);}
 \"  {adjust();str_init();BEGIN(STR);}
 " "	 {adjust(); continue;}
+""  {adjust(); continue;}
 \n	 {adjust(); EM_newline(); continue;}
+\t  {adjust(); continue;}
 ","	 {adjust(); return COMMA;}
 ":"  {adjust(); return COLON;}
+";"  {adjust(); return SEMICOLON;}
 "("  {adjust(); return LPAREN;}
 ")"  {adjust(); return RPAREN;}
 "["  {adjust(); return LBRACK;}
@@ -84,9 +95,9 @@ void adjust(void)
 "="  {adjust(); return EQ;}
 "<>"  {adjust(); return NEQ;}
 "<"  {adjust(); return LT;}
-"<="  {adjust(); return LEQ;}
+"<="  {adjust(); return LE;}
 ">"  {adjust(); return GT;}
-">="  {adjust(); return GEQ;}
+">="  {adjust(); return GE;}
 "&"  {adjust(); return AND;}
 "|"  {adjust(); return OR;}
 ":="  {adjust(); return ASSIGN;}
@@ -102,14 +113,15 @@ function {adjust();return FUNCTION;}
 var  {adjust();return VAR;}
 type  {adjust();return TYPE;}
 array  {adjust();return ARRAY;}
-if  {adjust();return ADJUST;}
+if  {adjust();return IF;}
 then {adjust();return THEN;}
 else  {adjust();return ELSE;}
 do  {adjust();return DO;}
 of  {adjust();return OF;}
-nil {adjust();return NIL}
+nil {adjust();return NIL;}
 
 [0-9]+	 {adjust(); yylval.ival=atoi(yytext); return INT;}
+[a-zA-Z][a-zA-Z0-9_]* {adjust(); yylval.sval=String(yytext); return ID;}
 .	 {adjust(); EM_error(EM_tokPos,"illegal token");}
 
 
