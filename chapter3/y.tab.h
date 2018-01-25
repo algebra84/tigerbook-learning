@@ -59,7 +59,7 @@ extern int yydebug;
     PLUS = 269,
     MINUS = 270,
     TIMES = 271,
-    DIV = 272,
+    DIVIDE = 272,
     UMINUS = 273,
     COMMA = 274,
     COLON = 275,
@@ -71,25 +71,24 @@ extern int yydebug;
     LBRACE = 281,
     RBRACE = 282,
     DOT = 283,
-    DIVIDE = 284,
-    ASSIGN = 285,
-    ARRAY = 286,
-    IF = 287,
-    THEN = 288,
-    ELSE = 289,
-    WHILE = 290,
-    FOR = 291,
-    TO = 292,
-    DO = 293,
-    LET = 294,
-    IN = 295,
-    END = 296,
-    OF = 297,
-    BREAK = 298,
-    NIL = 299,
-    FUNCTION = 300,
-    VAR = 301,
-    TYPE = 302
+    ASSIGN = 284,
+    ARRAY = 285,
+    IF = 286,
+    THEN = 287,
+    ELSE = 288,
+    WHILE = 289,
+    FOR = 290,
+    TO = 291,
+    DO = 292,
+    LET = 293,
+    IN = 294,
+    END = 295,
+    OF = 296,
+    BREAK = 297,
+    NIL = 298,
+    FUNCTION = 299,
+    VAR = 300,
+    TYPE = 301
   };
 #endif
 /* Tokens.  */
@@ -107,7 +106,7 @@ extern int yydebug;
 #define PLUS 269
 #define MINUS 270
 #define TIMES 271
-#define DIV 272
+#define DIVIDE 272
 #define UMINUS 273
 #define COMMA 274
 #define COLON 275
@@ -119,25 +118,24 @@ extern int yydebug;
 #define LBRACE 281
 #define RBRACE 282
 #define DOT 283
-#define DIVIDE 284
-#define ASSIGN 285
-#define ARRAY 286
-#define IF 287
-#define THEN 288
-#define ELSE 289
-#define WHILE 290
-#define FOR 291
-#define TO 292
-#define DO 293
-#define LET 294
-#define IN 295
-#define END 296
-#define OF 297
-#define BREAK 298
-#define NIL 299
-#define FUNCTION 300
-#define VAR 301
-#define TYPE 302
+#define ASSIGN 284
+#define ARRAY 285
+#define IF 286
+#define THEN 287
+#define ELSE 288
+#define WHILE 289
+#define FOR 290
+#define TO 291
+#define DO 292
+#define LET 293
+#define IN 294
+#define END 295
+#define OF 296
+#define BREAK 297
+#define NIL 298
+#define FUNCTION 299
+#define VAR 300
+#define TYPE 301
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -151,7 +149,7 @@ union YYSTYPE
 	string sval;
 	
 
-#line 155 "y.tab.h" /* yacc.c:1909  */
+#line 153 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

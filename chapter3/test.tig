@@ -1,2 +1,10 @@
-some is wrrong 1
-dsafas 1
+
+/* (for i := 0 to N-1
+ do (for j := 0 to N-1 
+ do print(if col[i]=j then " O" else " .");
+ print("\n"));
+ print("\n"))
+*/
+/* if col[i]=j then " O" else " ."*/
+
+col[2] = j

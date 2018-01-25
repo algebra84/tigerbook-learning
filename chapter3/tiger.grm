@@ -24,7 +24,7 @@ void yyerror(char *s)
 %left AND OR
 %nonassoc EQ NEQ GT GE LE LT
 %left PLUS MINUS
-%left TIMES DIV
+%left TIMES DIVIDE
 %nonassoc UMINUS
 
 %token 
@@ -64,11 +64,10 @@ ty : ID
    ;
 
 tyfields_1 : ID COLON ID
+           | tyfields_1 COMMA ID COLON ID
            ;
-tyfields_2 : COMMA tyfields_1 tyfields_2;
-           |
-           ;
-tyfields : tyfields_1 tyfields_2
+
+tyfields : tyfields_1
          |
          ;
 
@@ -80,10 +79,40 @@ fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp
        | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp
        ;
 
+
 /* expression */
+
+exp : NIL
+    | lvalue
+    | sequencing
+    | INT
+    | STRING
+    | MINUS exp %prec UMINUS
+    | arith
+    | comp
+    | strcomp
+    | boolen_arith
+    | ID LBRACE RBRACE
+    | ID LBRACE ass RBRACE
+    | ID LBRACK exp RBRACK OF exp
+    | lvalue ASSIGN exp
+    | IF exp THEN exp ELSE exp
+    | IF exp THEN exp
+    | WHILE exp DO exp
+    | FOR ID ASSIGN exp TO exp DO exp
+    | BREAK
+    | LET decs IN explist END
+    | LPAREN explist RPAREN
+    | funcall
+    | LPAREN error RPAREN
+    | error SEMICOLON exp
+    ;
+
+
 lvalue : ID
        | lvalue DOT ID
-       | lvalue LBRACK ID RBRACK
+       | lvalue LBRACK exp RBRACK
+       | ID LBRACK exp RBRACK
        ;
 
 sequencing : LPAREN exp SEMICOLON exp exp_2 RPAREN
@@ -96,14 +125,19 @@ exp_2 : SEMICOLON exp exp_2
       |
       ;
 
-arith_op : MINUS
-         | PLUS
-         | TIMES
-         | DIV
-         ;
+
 arith : exp arith_op exp
       ;
 
+
+
+comp : exp comp_op exp
+     ;
+
+strcomp : STRING comp_op STRING
+        ;
+boolen_arith : exp boolen_op exp
+             ;
 
 comp_op : EQ
         | NEQ
@@ -112,55 +146,23 @@ comp_op : EQ
         | LE
         | LT
         ;
+
 boolen_op : AND
           | OR
           ;
-comp : exp comp_op exp
-     ;
-strcomp : STRING comp_op STRING
-        ;
-boolen_arith : exp boolen_op exp
-             ;
+arith_op : MINUS
+         | PLUS
+         | TIMES
+         | DIVIDE
+         ;
 
 funcall : ID LPAREN RPAREN
         | ID LPAREN param RPAREN
         ;
-param  : exp param_1
+param  : exp
+       | exp COMMA param
        ;
-param_1 : COMMA exp param_1
-        |
-        ;
 
-record_create : ID LBRACE record_arg RBRACE
-              ;
-record_arg: ID ASSIGN exp record_arg1
-          |
-          ;
-record_arg1 : COMMA ID ASSIGN exp record_arg1
-            |
-            ;
-array_create : ID LBRACK exp RBRACK OF exp
-exp : NIL
-    | sequencing
-    | INT
-    | STRING
-    | MINUS exp %prec UMINUS
-    | arith
-    | comp
-    | strcomp
-    | boolen_arith
-    | record_create
-    | array_create
-    | ID
-    | lvalue ASSIGN exp
-    | IF exp THEN exp ELSE exp
-    | IF exp THEN exp
-    | WHILE exp DO exp
-    | FOR ID ASSIGN exp TO exp DO exp
-    | BREAK
-    | LET decs IN explist END
-    | LPAREN explist RPAREN
-    | funcall
-    | LPAREN error RPAREN
-    | error SEMICOLON exp
+ass : ID EQ exp
+    | ID EQ exp COMMA ass
     ;
