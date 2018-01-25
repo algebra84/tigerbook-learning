@@ -2,6 +2,7 @@
 #include "util.h"
 #include "errormsg.h"
 
+extern FILE* yyin, *yyout;
 extern int yyparse(void);
 
 void parse(string fname) 
@@ -13,6 +14,8 @@ void parse(string fname)
 
 
 int main(int argc, char **argv) {
+  yyin = stdin;
+  yyout = stdout;
  if (argc!=2) {fprintf(stderr,"usage: a.out filename\n"); exit(1);}
  parse(argv[1]);
  return 0;
