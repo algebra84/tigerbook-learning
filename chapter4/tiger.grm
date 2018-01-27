@@ -48,6 +48,124 @@ program:   exp    {absyn_root=$1;}
 
 exp:   ID         {$$=A_VarExp(EM_tokPos,A_SimpleVar(EM_tokPos,S_Symbol($1)));}
 
+/* declation */
+decs : dec decs {$$ = A_DecList($1, $2);}
+     |
+     ;
+dec : tydec {$$ = A_TypeDec(EM_tokPos, $1);}
+    | vardec {$$ = $1} 
+    | fundec {$$ = A_FunctionDec(EM_tokPos,$1);}
+    ;
+
+tydec : TYPE ID EQ ty {$$ = A_Namety(S_Symbol($2),$4)}
+                       
+      ;
+ty : ID
+   | LBRACE tyfields RBRACE
+   | ARRAY OF ID
+   ;
+
+tyfields_1 : ID COLON ID
+           | tyfields_1 COMMA ID COLON ID
+           ;
+
+tyfields : tyfields_1
+         |
+         ;
+
+vardec : VAR ID ASSIGN exp
+       | VAR ID COLON ID ASSIGN exp
+       ;
+
+fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp
+       | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp
+       ;
 
 
+/* expression */
+
+exp : NIL
+    | lvalue
+    | sequencing
+    | INT
+    | STRING
+    | MINUS exp %prec UMINUS
+    | arith
+    | comp
+    | strcomp
+    | boolen_arith
+    | ID LBRACE RBRACE
+    | ID LBRACE ass RBRACE
+    | ID LBRACK exp RBRACK OF exp
+    | lvalue ASSIGN exp
+    | IF exp THEN exp ELSE exp
+    | IF exp THEN exp
+    | WHILE exp DO exp
+    | FOR ID ASSIGN exp TO exp DO exp
+    | BREAK
+    | LET decs IN explist END
+    | LPAREN explist RPAREN
+    | funcall
+    | LPAREN error RPAREN
+    | error SEMICOLON exp
+    ;
+
+
+lvalue : ID
+       | lvalue DOT ID
+       | lvalue LBRACK exp RBRACK
+       | ID LBRACK exp RBRACK
+       ;
+
+sequencing : LPAREN exp SEMICOLON exp exp_2 RPAREN
+           ;
+explist : exp exp_2
+        |
+        ;
+
+exp_2 : SEMICOLON exp exp_2
+      |
+      ;
+
+
+arith : exp arith_op exp
+      ;
+
+
+
+comp : exp comp_op exp
+     ;
+
+strcomp : STRING comp_op STRING
+        ;
+boolen_arith : exp boolen_op exp
+             ;
+
+comp_op : EQ
+        | NEQ
+        | GE
+        | GT
+        | LE
+        | LT
+        ;
+
+boolen_op : AND
+          | OR
+          ;
+arith_op : MINUS
+         | PLUS
+         | TIMES
+         | DIVIDE
+         ;
+
+funcall : ID LPAREN RPAREN
+        | ID LPAREN param RPAREN
+        ;
+param  : exp
+       | exp COMMA param
+       ;
+
+ass : ID EQ exp
+    | ID EQ exp COMMA ass
+    ;
 	
