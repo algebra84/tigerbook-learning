@@ -1,4 +1,6 @@
 #include "venv.h"
+
+
 E_enventry E_VarEntry(Ty_ty ty){
   E_enventry p = checked_malloc(sizeof(*p));
   p->kind = E_varEntry;

@@ -25,12 +25,12 @@ typedef struct A_nametyList_ *A_nametyList;
 typedef struct A_efield_ *A_efield;
 typedef struct A_efieldList_ *A_efieldList;
 
-enum A_oper_{A_plusOp, A_minusOp, A_timesOp, A_divideOp,
-	     A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp};
-typedef enum A_oper_ A_oper;
+typedef enum A_oper_{A_plusOp, A_minusOp, A_timesOp, A_divideOp,
+	     A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp}A_oper;
 
+typedef enum {A_simpleVar, A_fieldVar, A_subscriptVar} Enum_var;
 struct A_var_
-       {enum {A_simpleVar, A_fieldVar, A_subscriptVar} kind;
+       {Enum_var kind;
         A_pos pos;
 	union {S_symbol simple;
 	       struct {A_var var;
@@ -39,11 +39,11 @@ struct A_var_
 		       A_exp exp;} subscript;
 	     } u;
       };
-
+typedef enum {A_varExp, A_nilExp, A_intExp, A_stringExp, A_callExp,
+	A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
+	A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp} Enum_exp;
 struct A_exp_
-      {enum {A_varExp, A_nilExp, A_intExp, A_stringExp, A_callExp,
-	       A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
-	       A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp} kind;
+      { Enum_exp kind;
        A_pos pos;
        union {A_var var;
 	      /* nil; - needs only the pos */
@@ -63,8 +63,9 @@ struct A_exp_
 	    } u;
      };
 
+typedef enum {A_functionDec, A_varDec, A_typeDec}Enumdec;
 struct A_dec_ 
-    {enum {A_functionDec, A_varDec, A_typeDec} kind;
+    {Enumdec kind;
      A_pos pos;
      union {A_fundecList function;
 	    /* escape may change after the initial declaration */
