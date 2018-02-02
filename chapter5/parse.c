@@ -3,12 +3,8 @@
  */
 
 #include <stdio.h>
-#include "util.h"
-#include "symbol.h"
-#include "absyn.h"
-#include "errormsg.h"
+#include "semant.h"
 #include "parse.h"
-#include "prabsyn.h"
 
 extern int yyparse(void);
 extern A_exp absyn_root;
@@ -19,7 +15,7 @@ A_exp parse(string fname)
 {EM_reset(fname);
  if (yyparse() == 0) /* parsing worked */
    {
-     pr_exp(yyout, absyn_root, 2);
+     fprintf(stderr, "parsing success!\n");
      return absyn_root;
    }
  fprintf(stderr, "parsing failed");
@@ -30,7 +26,7 @@ int main(int argc, char **argv) {
   yyin = stdin;
   yyout = stdout;
   if (argc!=2) {fprintf(stderr,"usage: a.out filename\n"); exit(1);}
-  parse(argv[1]);
+  SEM_transProg(parse(argv[1]));
  
   return 0;
 }

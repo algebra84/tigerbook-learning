@@ -74,7 +74,8 @@ struct A_dec_
 	  } u;
    };
 
-struct A_ty_ {enum {A_nameTy, A_recordTy, A_arrayTy} kind;
+typedef enum {A_nameTy, A_recordTy, A_arrayTy}Enumaty;
+struct A_ty_ {Enumaty kind;
 	      A_pos pos;
 	      union {S_symbol name;
 		     A_fieldList record;

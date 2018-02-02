@@ -1,5 +1,5 @@
-a.out: parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o
-	cc -g parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o
+a.out: parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o
+	cc -g parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o
 
 parse.o: parse.c errormsg.h util.h
 	cc -g -c parse.c
@@ -30,6 +30,15 @@ absyn.o: absyn.c util.h symbol.h absyn.h
 
 prabsyn.o: prabsyn.c util.h symbol.h absyn.h
 	cc -g -c prabsyn.c
+
+venv.o: venv.c venv.h
+	cc -g -c venv.c
+
+semant.o: semant.c
+	cc -g -c semant.c
+
+types.o: types.c
+	cc -g -c types.c
 #lex.yy.c: tiger.lex
 #	lex tiger.lex
 
@@ -37,4 +46,4 @@ util.o: util.c util.h
 	cc -g -c util.c
 
 clean: 
-	rm -f a.out util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o absyn.o parse.o symbol.o table.o
+	rm -f a.out util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o absyn.o parse.o symbol.o table.o prabsyn.o venv.o semant.o types.o

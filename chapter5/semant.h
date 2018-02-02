@@ -12,3 +12,5 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a);
 void  transDec(S_table venv, S_table tenv, A_dec d);
 Ty_ty transTy (S_table venv, S_table tenv, A_ty a);
 bool EqualTy(Ty_ty left, Ty_ty right);
+
+void SEM_transProg(A_exp exp);

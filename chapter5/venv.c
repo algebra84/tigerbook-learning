@@ -32,13 +32,13 @@ S_table E_base_venv(){
   S_enter(t,S_Symbol("print"),func);
 
   //flush() function
-  formals = Ty_TyList(NULL, NULL);
+  formals = NULL;
   result = Ty_Void();
   func = E_FunEntry(formals, result);
   S_enter(t,S_Symbol("flush"),func);
 
   //getchar() :string
-  formals = Ty_TyList(NULL, NULL);
+  formals = NULL;
   result = Ty_String();
   func = E_FunEntry(formals, result);
   S_enter(t,S_Symbol("getchar"),func);

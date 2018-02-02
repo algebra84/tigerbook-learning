@@ -143,6 +143,7 @@ exp : NIL  {$$ = A_NilExp(EM_tokPos);}
     | FOR ID ASSIGN exp TO exp DO exp  {$$ = A_ForExp(EM_tokPos,S_Symbol($2),$4,$6,$8);}
     | BREAK  {$$ = A_BreakExp(EM_tokPos);}
     | LET decs IN explist END  {$$ = A_LetExp(EM_tokPos, $2, A_SeqExp(EM_tokPos,$4));}
+    | LPAREN exp RPAREN  {$$ = $2;}
     | LPAREN explist RPAREN  {$$ = A_SeqExp(EM_tokPos,$2);}
     | funcall  {$$ = $1;}
     | LPAREN error RPAREN  {$$ = A_SeqExp(EM_tokPos, NULL);}
