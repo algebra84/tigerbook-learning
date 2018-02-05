@@ -7,3 +7,4 @@
 *.log
 cmake-build-debug
 .idea
+y.tab.*

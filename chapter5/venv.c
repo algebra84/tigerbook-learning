@@ -15,6 +15,7 @@ E_enventry E_FunEntry(Ty_tyList formals, Ty_ty result){
   p->u.fun.result = result;
   return p;
 }
+
 /* Ty_ ty environment */
 S_table E_base_tenv(){
   S_table t = S_empty();

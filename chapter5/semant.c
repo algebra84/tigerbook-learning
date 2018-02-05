@@ -6,19 +6,27 @@ struct expty expTy(Tr_exp exp, Ty_ty ty) {
   e.ty=ty;
   return e;
 }
+
+Ty_ty actual_ty(Ty_ty namety){
+  if(namety->kind == Ty_name)
+    return actual_ty(namety->u.name.ty);
+  return namety;
+}
 //Ty_record, Ty_nil, Ty_int, Ty_string, Ty_array,
 //Ty_name, Ty_void
 bool EqualTy(Ty_ty left, Ty_ty right){
-  switch(left->kind){
+  Ty_ty l = actual_ty(left);
+  Ty_ty r = actual_ty(right);
+  switch(l->kind){
     case Ty_array:
-      return left == right;
+      return l == r;
     case Ty_record:
-      return left == right || right->kind == Ty_nil;
+      return l == r || r->kind == Ty_nil;
     case Ty_int:
     case Ty_string:
     case Ty_void:
     case Ty_nil:
-      return right->kind == left->kind;
+      return r->kind == l->kind;
     case Ty_name:
     default:
       return 0;
@@ -30,7 +38,7 @@ struct expty transVar(S_table venv, S_table tenv, A_var v){
     case A_simpleVar:{
       E_enventry x = S_look(venv,v->u.simple);
       if(x && x->kind == E_varEntry)
-        return expTy(NULL,x->u.var.ty);
+        return expTy(NULL,actual_ty(x->u.var.ty));
       else{
         EM_error(v->pos,"undefined variable %s",S_name(v->u.simple));
         return expTy(NULL,Ty_Void());
@@ -144,7 +152,7 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a){
       }
     }
     case A_recordExp:{
-      Ty_ty recordtype = S_look(tenv,a->u.record.typ);
+      Ty_ty recordtype = actual_ty(S_look(tenv,a->u.record.typ));
       if(!recordtype) {
         EM_error(a->pos, "%s is not record type\n", S_name(a->u.record.typ));
         return expTy(NULL, Ty_Record(NULL));
@@ -174,9 +182,12 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a){
     case  A_seqExp:{
       A_expList itlist = a->u.seq;
       A_exp iter;
+
       for(;itlist != NULL; itlist = itlist->tail){
         iter = itlist->head;
-        transExp(venv,tenv,iter);
+        struct expty res = transExp(venv,tenv,iter);
+        if(!itlist->tail)
+          return res;
       }
       return expTy(NULL, Ty_Void());
     }
@@ -250,7 +261,7 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a){
       return res;
     }
     case A_arrayExp:{
-      Ty_ty arraytype = S_look(tenv,a->u.array.typ);
+      Ty_ty arraytype = actual_ty(S_look(tenv,a->u.array.typ));
       if(!arraytype)
         EM_error(a->pos, "unknown array type\n");
       struct expty arraysize = transExp(venv,tenv,a->u.array.size);
@@ -264,14 +275,57 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a){
 
   }
 }
+
+void transDec_recur(S_table venv, S_table tenv,
+                    A_nametyList begin, A_nametyList end){
+  S_table local_env = S_empty();
+  A_nametyList it;
+  for(it = begin; it != end; it = it->tail){
+    A_namety nty = it->head;
+    assert(nty->ty->kind == A_arrayTy || nty->ty->kind == A_recordTy);
+    if(S_look(local_env,nty->name))
+      EM_error(nty->ty->pos, "%s redecalared in recur dec\n",
+      S_name(nty->name));
+    S_enter(local_env,nty->name, Ty_Name(nty->name,NULL));
+    S_enter(tenv,nty->name,Ty_Name(nty->name,NULL));
+  }
+
+  for(it = begin; it != end; it = it->tail){
+    Ty_ty dty = S_look(tenv, it->head->name);
+    assert(dty->kind == Ty_name);
+    dty->u.name.ty = transTy(venv, tenv,it->head->ty);
+  }
+  return;
+}
+
 void  transDec(S_table venv, S_table tenv, A_dec d){
   switch(d->kind){
     case A_typeDec:{
       A_nametyList itlist = d->u.type;
+      A_nametyList begin = NULL,end = NULL;
+      int in_recur = 0;
       for(;itlist != NULL; itlist=itlist->tail){
         A_namety it = itlist->head;
+        if(!in_recur &&
+           (it->ty->kind == A_recordTy || it->ty->kind == A_arrayTy)){
+          begin = itlist;
+          in_recur = 1;
+          continue;
+        }
+        if(in_recur) {
+          if (it->ty->kind == A_nameTy) {
+            end = itlist;
+            transDec_recur(venv, tenv, begin, end);
+            in_recur = 0;
+          }
+          else
+            continue;
+        }
+
         S_enter(tenv,it->name,transTy(venv,tenv,it->ty));
       }
+      if(in_recur)
+        transDec_recur(venv,tenv,begin,NULL);
       break;
     }
     case A_varDec:{
@@ -293,10 +347,14 @@ void  transDec(S_table venv, S_table tenv, A_dec d){
     }
     case A_functionDec:{
 
-      A_fundecList funcs = d->u.function;
-      for(;funcs != NULL; funcs = funcs->tail){
-        S_beginScope(venv);
+      A_fundecList funcs;
+      S_table local_venv = S_empty();
+      // trans declare of functions
+      for(funcs = d->u.function;funcs != NULL; funcs = funcs->tail){
         A_fundec func = funcs->head;
+        if(S_look(local_venv,func->name))
+          EM_error(func->pos,"%s redeclared in recur fundecs\n",
+                   S_name(func->name));
         A_fieldList fields = func->params;
         Ty_tyList formals = NULL;
         Ty_ty res = Ty_Void();
@@ -316,14 +374,9 @@ void  transDec(S_table venv, S_table tenv, A_dec d){
           }
           else {
             formals = Ty_TyList(field, formals);
-            S_enter(venv,fields->head->name,E_VarEntry(field));
           }
         }
 
-        struct expty ret = transExp(venv,tenv,func->body);
-        if(!EqualTy(res,ret.ty))
-          EM_error(func->body->pos,"conflict return type \n");
-        S_endScope(venv);
         // reverse formals orders: up to down
         Ty_tyList tmp = formals;
         formals = NULL;
@@ -331,12 +384,33 @@ void  transDec(S_table venv, S_table tenv, A_dec d){
           Ty_ty field = tmp->head;
           formals = Ty_TyList(field,formals);
         }
+        S_enter(local_venv,func->name,E_FunEntry(formals, res));
         S_enter(venv,func->name,E_FunEntry(formals, res));
+      }
+
+      // trans body of functions
+      for(funcs = d->u.function;funcs != NULL; funcs = funcs->tail){
+        S_beginScope(venv);
+        A_fundec func = funcs->head;
+        A_fieldList fields = func->params;
+
+        for(;fields != NULL; fields = fields->tail){
+          Ty_ty field = S_look(tenv,fields->head->typ);
+          if(field)
+            S_enter(venv,fields->head->name,E_VarEntry(field));
+        }
+
+        struct expty ret = transExp(venv,tenv,func->body);
+        Ty_ty res = ((E_enventry) (S_look(venv,func->name)))->u.fun.result;
+        if(!EqualTy(res,ret.ty))
+          EM_error(func->body->pos,"conflict return type \n");
+        S_endScope(venv);
       }
 
     }
   }
 }
+
 Ty_ty transTy (S_table venv, S_table tenv, A_ty a){
   switch(a->kind){
     case A_nameTy: {
