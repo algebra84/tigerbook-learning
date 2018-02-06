@@ -39,8 +39,12 @@ void yyerror(char *s)
   struct A_efieldList_* efieldlist;
 	}
 
-%left AND OR
-%nonassoc EQ NEQ GT GE LT LE
+%left SEMICOLON
+%right THEN ELSE DOT DO OF
+%right ASSIGN
+%left OR 
+%left AND 
+%nonassoc EQ NEQ LT LE GT GE 
 %left PLUS MINUS
 %left TIMES DIVIDE
 %nonassoc UMINUS
@@ -67,10 +71,9 @@ void yyerror(char *s)
 %type <field> tyfield
 %type <fieldlist> tyfields
 
-%type <exp> program exp arith comp strcomp boolen_arith funcall
+%type <exp> program exp funcall
 %type <var> lvalue
 %type <explist> explist paramlist
-%type <oper> comp_op arith_op
 %type <efieldlist> ass
 
 /* et cetera */
@@ -129,10 +132,18 @@ exp : NIL  {$$ = A_NilExp(EM_tokPos);}
     | INT  {$$ = A_IntExp(EM_tokPos, $1);}
     | STRING  {$$ = A_StringExp(EM_tokPos, $1);}
     | MINUS exp %prec UMINUS {$$ = A_OpExp(EM_tokPos,A_minusOp,A_IntExp(EM_tokPos,0),$2);}
-    | arith {$$ = $1;}
-    | comp  {$$ = $1;}
-    | strcomp  {$$ = $1;}
-    | boolen_arith  {$$ = $1;}
+    | exp PLUS exp  {$$ = A_OpExp(EM_tokPos,A_plusOp,$1,$3);}
+    | exp MINUS exp  {$$ = A_OpExp(EM_tokPos,A_minusOp,$1,$3);}
+    | exp TIMES exp  {$$ = A_OpExp(EM_tokPos,A_timesOp,$1,$3);}
+    | exp DIVIDE exp  {$$ = A_OpExp(EM_tokPos,A_divideOp,$1,$3);}
+    | exp GE exp  {$$ = A_OpExp(EM_tokPos,A_geOp,$1,$3);}
+    | exp LE exp  {$$ = A_OpExp(EM_tokPos,A_leOp,$1,$3);}
+    | exp EQ exp  {$$ = A_OpExp(EM_tokPos,A_eqOp,$1,$3);}
+    | exp NEQ exp  {$$ = A_OpExp(EM_tokPos,A_neqOp,$1,$3);}
+    | exp GT exp  {$$ = A_OpExp(EM_tokPos,A_gtOp,$1,$3);}
+    | exp LT exp  {$$ = A_OpExp(EM_tokPos,A_ltOp,$1,$3);}
+    | exp AND exp  {$$ = A_IfExp(EM_tokPos,$1,$3,A_IntExp(EM_tokPos,0));}
+    | exp OR exp  {$$ = A_IfExp(EM_tokPos,$1,A_IntExp(EM_tokPos,1),$3);}
     | ID LBRACE RBRACE  {$$ = A_RecordExp(EM_tokPos,S_Symbol($1),NULL);}
     | ID LBRACE ass RBRACE  {$$ = A_RecordExp(EM_tokPos,S_Symbol($1),$3);}
     | ID LBRACK exp RBRACK OF exp  {$$ = A_ArrayExp(EM_tokPos,S_Symbol($1),$3,$6);}
@@ -143,11 +154,9 @@ exp : NIL  {$$ = A_NilExp(EM_tokPos);}
     | FOR ID ASSIGN exp TO exp DO exp  {$$ = A_ForExp(EM_tokPos,S_Symbol($2),$4,$6,$8);}
     | BREAK  {$$ = A_BreakExp(EM_tokPos);}
     | LET decs IN explist END  {$$ = A_LetExp(EM_tokPos, $2, A_SeqExp(EM_tokPos,$4));}
-    | LPAREN exp RPAREN  {$$ = $2;}
     | LPAREN explist RPAREN  {$$ = A_SeqExp(EM_tokPos,$2);}
     | funcall  {$$ = $1;}
     | LPAREN error RPAREN  {$$ = A_SeqExp(EM_tokPos, NULL);}
-    | error SEMICOLON exp  {$$ = $3;}
     ;
 
 
@@ -160,36 +169,8 @@ lvalue : ID  {$$ = A_SimpleVar(EM_tokPos, S_Symbol($1));}
 explist : exp   {$$ = A_ExpList($1,NULL);}
         | exp SEMICOLON explist {$$ = A_ExpList($1,$3);}
         |  {$$ = NULL;}
+        | error SEMICOLON exp {$$ = A_ExpList($3, NULL);}
         ;
-
-arith : exp arith_op exp  {$$ = A_OpExp(EM_tokPos,$2,$1,$3);}
-      ;
-
-
-
-comp : exp comp_op exp  {$$ = A_OpExp(EM_tokPos,$2,$1,$3);}
-     ;
-
-strcomp : STRING comp_op STRING {$$ = A_OpExp(EM_tokPos,$2,A_StringExp(EM_tokPos,$1), A_StringExp(EM_tokPos,$3));}
-        ;
-
-boolen_arith : exp AND exp  {$$ = A_IfExp(EM_tokPos,$1,$3,A_IntExp(EM_tokPos,0));}
-             | exp OR exp  {$$ = A_IfExp(EM_tokPos,$1,A_IntExp(EM_tokPos,1),$3);}
-             ;
-
-comp_op : EQ  {$$ = A_eqOp;}
-        | NEQ {$$ = A_neqOp;}
-        | GE  {$$ = A_geOp;}
-        | GT  {$$ = A_gtOp;}
-        | LE  {$$ = A_leOp;}
-        | LT  {$$ = A_ltOp;}
-        ;
-
-arith_op : MINUS  {$$ = A_minusOp;}
-         | PLUS  {$$ = A_plusOp;}
-         | TIMES  {$$ = A_timesOp;}
-         | DIVIDE  {$$ = A_divideOp;}
-         ;
 
 funcall : ID LPAREN RPAREN  {$$ = A_CallExp(EM_tokPos,S_Symbol($1),NULL);}
         | ID LPAREN paramlist RPAREN {$$ = A_CallExp(EM_tokPos,S_Symbol($1),$3);}

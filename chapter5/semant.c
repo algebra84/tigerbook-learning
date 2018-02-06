@@ -8,9 +8,10 @@ struct expty expTy(Tr_exp exp, Ty_ty ty) {
 }
 
 Ty_ty actual_ty(Ty_ty namety){
-  if(namety->kind == Ty_name)
-    return actual_ty(namety->u.name.ty);
-  return namety;
+  if(!namety || namety->kind != Ty_name)
+    return namety;
+
+  return actual_ty(namety->u.name.ty);
 }
 //Ty_record, Ty_nil, Ty_int, Ty_string, Ty_array,
 //Ty_name, Ty_void
@@ -51,7 +52,7 @@ struct expty transVar(S_table venv, S_table tenv, A_var v){
         for(;itlist != NULL; itlist = itlist->tail){
           Ty_field it = itlist->head;
           if(it->name == v->u.field.sym)
-            return expTy(NULL,it->ty);
+            return expTy(NULL,actual_ty(it->ty));
         }
         EM_error(v->pos,"record has no such field %s\n",S_name(v->u.field.sym));
       }
@@ -66,7 +67,7 @@ struct expty transVar(S_table venv, S_table tenv, A_var v){
         EM_error(v->u.subscript.var->pos,"value is not array\n");
       if(arrayexp.ty->kind != Ty_int)
         EM_error(v->u.subscript.exp->pos,"subscript should result int\n");
-      return expTy(NULL,arraytype.ty->u.array);
+      return expTy(NULL,actual_ty(arraytype.ty->u.array));
     }
   }
   
@@ -108,7 +109,7 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a){
       }
       if (formals != NULL)
         EM_error(a->pos, "less than param number\n");
-      return expTy(NULL, call->u.fun.result);
+      return expTy(NULL, actual_ty(call->u.fun.result));
     }
     case A_opExp: {
       A_oper oper = a->u.op.oper;
@@ -145,7 +146,10 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a){
             return expTy(NULL,Ty_Int());
           if((left.ty->kind == Ty_array)
              && EqualTy(left.ty,right.ty))
-              return expTy(NULL, Ty_Int());
+            return expTy(NULL, Ty_Int());
+          if((left.ty->kind == Ty_name)
+              && EqualTy(left.ty,right.ty))
+            return expTy(NULL, Ty_Int());
           EM_error(a->u.op.left->pos,"comparison of imcompatible types\n");
           return expTy(NULL, Ty_Int());
         }
@@ -342,6 +346,8 @@ void  transDec(S_table venv, S_table tenv, A_dec d){
         }
         break;
       }
+      if(initexp.ty->kind == Ty_nil)
+        EM_error(d->u.var.init->pos, "unvalid initial exp Nil\n");
       S_enter(venv, d->u.var.var, E_VarEntry(initexp.ty));
       break;
     }
