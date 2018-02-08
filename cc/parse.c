@@ -3,6 +3,14 @@
  */
 
 #include <stdio.h>
+#include "util.h"
+#include "errormsg.h"
+#include "symbol.h"
+#include "types.h"
+#include "absyn.h"
+#include "temp.h"
+#include "translate.h"
+#include "venv.h"
 #include "semant.h"
 #include "parse.h"
 

@@ -1,13 +1,11 @@
-#include "frame.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "util.h"
 #include "symbol.h"
 #include "temp.h"
-#include "table.h"
+#include "frame.h"
 
-struct F_frame_{
+struct F_frame_ {
     size_t size;
     Temp_label label;
     F_accessList formals;
@@ -45,11 +43,7 @@ static F_access InReg(Temp_temp reg){
 }
 
 F_accessList F_newlist(F_access head, F_accessList tail){
-  F_accessList p;
-  if(!tail)
-    p = checked_malloc(sizeof(*p));
-  else
-    p = tail;
+  F_accessList p = checked_malloc(sizeof(*p));
   p->head = head;
   p->tail = tail;
   return p;
