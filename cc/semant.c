@@ -397,7 +397,7 @@ void  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d){
         formals = NULL;
         U_boolList ublist = NULL;
         for(;tmp;tmp = tmp->tail){
-          ublist = U_BoolList(FALSE,ublist);
+          ublist = U_BoolList(TRUE,ublist);
           Ty_ty field = tmp->head;
           formals = Ty_TyList(field,formals);
         }
