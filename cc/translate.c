@@ -8,13 +8,21 @@
 #include "symbol.h"
 #include "temp.h"
 #include "frame.h"
-
+#include "tree.h"
 #include "translate.h"
+
 struct Tr_level_ {int level; Tr_level parent;F_frame frame;};
 
 struct Tr_access_ {Tr_level level; F_access access;};
 
 struct Tr_accessList_ {Tr_access head; Tr_accessList tail;};
+
+struct Cx {patchList trues; patchList falses; T_stm stm;};
+
+struct Tr_exp_ {
+  enum{Tr_ex, Tr_nx, Tr_cx} kind;
+  union{T_exp ex; T_stm nx; struct Cx cx;} u;
+};
 
 Tr_level out = NULL;
 
@@ -66,3 +74,8 @@ Tr_access Tr_allocLocal(Tr_level level, bool escape){
   p->access = F_allocLocal(level->frame,escape);
   return p;
 }
+
+
+static Tr_exp Tr_Ex(T_exp ex);
+static Tr_exp Tr_Nx(T_stm nx);
+static Tr_exp Tr_Cx(patchList trues, patchList false, T_stm stm);

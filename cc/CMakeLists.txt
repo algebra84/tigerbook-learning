@@ -28,4 +28,8 @@ add_executable(cc
         util.c
         util.h
         venv.c
+        printtree.c
+        printtree.h
+        tree.c
+        tree.h
         venv.h escape.h escape.c translate.c translate.h)

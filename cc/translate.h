@@ -5,6 +5,7 @@
 #ifndef CC_TRANSLATE_H
 #define CC_TRANSLATE_H
 /* translate.h */
+typedef struct Tr_exp_ *Tr_exp;
 typedef struct Tr_access_ *Tr_access;
 typedef struct Tr_accessList_ *Tr_accessList;
 typedef struct Tr_level_ *Tr_level;
