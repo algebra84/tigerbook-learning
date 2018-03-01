@@ -4,6 +4,22 @@
 #include "symbol.h"
 #include "temp.h"
 #include "frame.h"
+#include "tree.h"
+
+static Temp_temp fp = NULL;
+F_WORD_SIZE = 4;
+
+typedef enum {inFrame, inReg} Accesstype;
+struct F_access_
+{Accesstype kind;
+    union {
+        int offset;
+        /* InFrame */
+        Temp_temp reg;
+        /* InReg */
+
+    } u;
+};
 
 struct F_frame_ {
     size_t size;
@@ -16,17 +32,7 @@ struct F_frame_ {
     F_accessList argsPass;
 };
 
-typedef enum {inFrame, inReg} Accesstype;
-struct F_access_
-{Accesstype kind;
-  union {
-    int offset;
-    /* InFrame */
-    Temp_temp reg;
-    /* InReg */
 
-  } u;
-};
 
 static F_access InFrame(int offset){
   F_access p = checked_malloc(sizeof(*p));
@@ -62,12 +68,12 @@ F_frame F_newFrame(Temp_label name, U_boolList formals){
 
   U_boolList itlist = formals;
 
-
-  // for amd64 0 %ebp = old %EBP, 4 %ebp = %old eip
-  for(int offset = 8; itlist != NULL; itlist = itlist->tail){
-    p->formals = F_newlist(InFrame(offset),p->formals);
-    offset+=4;
-  }
+//  increase offset by F_alloc
+//  // for amd64 0 %ebp = old %EBP, 4 %ebp = %old eip
+//  for(int offset = 8; itlist != NULL; itlist = itlist->tail){
+//    p->formals = F_newlist(InFrame(offset),p->formals);
+//    offset+=4;
+//  }
   return p;
 }
 
@@ -87,4 +93,19 @@ F_access F_allocLocal(F_frame f, bool escape){
     f->locals = F_newlist(InReg(Temp_newtemp()),f->locals);
 
   return f->locals->head;
+}
+
+Temp_temp F_FP(void){
+  if(!fp)
+    fp = Temp_newtemp();
+  return fp;
+}
+
+T_exp F_Exp(F_access acc,T_exp framePtr){
+  if(acc->kind == inReg)
+    return T_Temp(acc->u.reg);
+  else {
+    assert(acc->kind == inFrame);
+    return T_Mem(T_Binop(T_plus, framePtr, T_Const(acc->u.offset)));
+  }
 }

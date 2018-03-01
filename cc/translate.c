@@ -17,14 +17,22 @@ struct Tr_access_ {Tr_level level; F_access access;};
 
 struct Tr_accessList_ {Tr_access head; Tr_accessList tail;};
 
+struct patchList_ {Temp_label *head; patchList tail;};
 struct Cx {patchList trues; patchList falses; T_stm stm;};
 
 struct Tr_exp_ {
-  enum{Tr_ex, Tr_nx, Tr_cx} kind;
+  Tr_expkind kind;
   union{T_exp ex; T_stm nx; struct Cx cx;} u;
 };
 
 Tr_level out = NULL;
+
+static patchList PatchList(Temp_label *head, patchList tail){
+  patchList p = checked_malloc(sizeof(*p));
+  p->head = head;
+  p->tail = tail;
+  return p;
+}
 
 Tr_accessList Tr_AccessList(Tr_access head,
                             Tr_accessList tail){
@@ -75,7 +83,98 @@ Tr_access Tr_allocLocal(Tr_level level, bool escape){
   return p;
 }
 
+void doPatch(patchList tList, Temp_label label){
+  for(;tList;tList=tList->tail)
+    *(tList->head) = label;
+}
 
-static Tr_exp Tr_Ex(T_exp ex);
-static Tr_exp Tr_Nx(T_stm nx);
-static Tr_exp Tr_Cx(patchList trues, patchList false, T_stm stm);
+patchList joinPatch(patchList first, patchList second){
+  if(!first)
+    return second;
+  for(;first->tail; first=first->tail);
+  first->tail=second;
+  return first;
+}
+
+static T_exp unEx(Tr_exp e){
+  switch(e->kind){
+    case Tr_ex:
+      return e->u.ex;
+    case Tr_cx: {
+      Temp_temp r = Temp_newtemp();
+      Temp_label t = Temp_newlabel(), f = Temp_newlabel();
+      doPatch(e->u.cx.trues, t);
+      doPatch(e->u.cx.falses, f);
+      return T_Eseq(T_Move(T_Temp(r), T_Const(1)),
+                    T_Eseq(e->u.cx.stm,
+                           T_Eseq(T_Label(f),
+                                  T_Eseq(T_Move(T_Temp(r), T_Const(0)),
+                                         T_Eseq(T_Label(t), T_Temp(r))))));
+    }
+    case Tr_nx:
+      return T_Eseq(e->u.nx,T_Const(0));
+  }
+  assert(0);
+}
+
+static T_stm unNx(Tr_exp e){
+  switch(e->kind){
+    case Tr_ex:
+      return T_Exp(e->u.ex);
+    case Tr_nx:
+      return e->u.nx;
+    case Tr_cx:
+      return e->u.cx.stm;
+  }
+  assert(0);
+}
+
+static struct Cx unCx(Tr_exp e){
+  switch(e->kind){
+    case Tr_cx:
+      return e->u.cx;
+    case Tr_ex:{
+      struct Cx res;
+      res.stm = T_Cjump(T_eq,e->u.ex,T_Const(0),NULL,NULL);
+      res.trues = PatchList(res.stm->u.CJUMP.true,NULL);
+      res.falses = PatchList(res.stm->u.CJUMP.false,NULL);
+      return res;
+    }
+  }
+  assert(0);
+}
+
+static Tr_exp Tr_Ex(T_exp ex){
+  Tr_exp p = checked_malloc(sizeof(*p));
+  p->kind = Tr_ex;
+  p->u.ex = ex;
+  return p;
+}
+
+static Tr_exp Tr_Nx(T_stm nx){
+  Tr_exp p = checked_malloc(sizeof(*p));
+  p->kind = Tr_nx;
+  p->u.nx = nx;
+  return p;
+}
+
+static Tr_exp Tr_Cx(patchList trues, patchList falses, T_stm stm){
+  Tr_exp p = checked_malloc(sizeof(*p));
+  p->kind = Tr_cx;
+  p->u.cx.falses = falses;
+  p->u.cx.stm = stm;
+  p->u.cx.trues = trues;
+  return p;
+}
+
+Tr_exp Tr_simpleVar(Tr_access access, Tr_level level){
+  Tr_level acc_level = access->level;
+  T_exp fp = T_Temp(F_FP());
+  for(; acc_level != level; acc_level = acc_level->parent)
+    fp = T_Mem(T_Binop(T_plus,fp,T_Const(0)));
+  return F_Exp(access->access,fp);
+}
+
+Tr_exp Tr_array() {
+
+}
