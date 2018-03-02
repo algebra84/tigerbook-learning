@@ -20,4 +20,7 @@ Tr_level Tr_newLevel(Tr_level parent, Temp_label name,
 Tr_accessList Tr_formals(Tr_level level);
 Tr_access Tr_allocLocal(Tr_level level, bool escape);
 Tr_exp Tr_simpleVar(Tr_access, Tr_level);
+
+void Tr_procEntryExit(Tr_level level, Tr_exp body, Tr_accessList formals);
+F_fragList Tr_getResult(void);
 #endif //CC_TRANSLATE_H

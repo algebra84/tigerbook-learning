@@ -16,7 +16,7 @@ struct expty expTy(Tr_exp exp, Ty_ty ty) {
   e.ty=ty;
   return e;
 }
-
+static int in_loop = 0;
 Ty_ty actual_ty(Ty_ty namety){
   if(!namety || namety->kind != Ty_name)
     return namety;
@@ -231,7 +231,9 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level,A_exp a){
       struct expty condition = transExp(venv,tenv,level,a->u.whilee.test);
       if(condition.ty->kind != Ty_int)
         EM_error(a->u.whilee.test->pos, "int type required by while\n");
+      in_loop = 1;
       struct expty body = transExp(venv,tenv,level,a->u.whilee.body);
+      in_loop = 0;
       if(body.ty->kind != Ty_void)
         EM_error(a->u.whilee.body->pos,"body of while not void\n");
       return expTy(NULL, Ty_Void());
@@ -245,14 +247,19 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level,A_exp a){
         EM_error(a->u.forr.hi->pos, "hi should be int by forr\n");
       S_beginScope(venv);
       S_enter(venv,a->u.forr.var,E_VarEntry(Tr_allocLocal(level,TRUE),Ty_Int()));
+      in_loop = 1;
       struct expty body = transExp(venv,tenv,level,a->u.forr.body);
+      in_loop = 0;
       if(body.ty->kind != Ty_void)
         EM_error(a->u.forr.body->pos, "body should be void type by forr\n");
       S_endScope(venv);
       return expTy(NULL, Ty_Void());
     }
-    case A_breakExp:
+    case A_breakExp: {
+      if (!in_loop)
+        EM_error(a->pos, "break should in loop\n");
       return expTy(NULL, Ty_Void());
+    }
     case A_letExp:{
       S_beginScope(tenv);
       S_beginScope(venv);
