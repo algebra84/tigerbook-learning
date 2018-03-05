@@ -8,4 +8,4 @@ void  transDec(S_table venv, S_table tenv, Tr_level level, A_dec d);
 Ty_ty transTy (S_table venv, S_table tenv, A_ty a);
 bool EqualTy(Ty_ty left, Ty_ty right);
 
-void SEM_transProg(A_exp exp);
+F_fragList SEM_transProg(A_exp exp);

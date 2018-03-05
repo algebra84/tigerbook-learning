@@ -11,11 +11,9 @@
 #include "tree.h"
 #include "translate.h"
 
-struct Tr_level_ {int level; Tr_level parent;F_frame frame;};
+struct Tr_level_ {int level; Tr_level parent;F_frame frame;Tr_accessList formals;};
 
 struct Tr_access_ {Tr_level level; F_access access;};
-
-struct Tr_accessList_ {Tr_access head; Tr_accessList tail;};
 
 struct patchList_ {Temp_label *head; patchList tail;};
 struct Cx {patchList trues; patchList falses; T_stm stm;};
@@ -25,7 +23,8 @@ struct Tr_exp_ {
   union{T_exp ex; T_stm nx; struct Cx cx;} u;
 };
 
-Tr_level out = NULL;
+static Tr_level out = NULL;
+static F_fragList flist = NULL;
 
 static patchList PatchList(Temp_label *head, patchList tail){
   patchList p = checked_malloc(sizeof(*p));
@@ -52,16 +51,7 @@ Tr_level Tr_outermost(void){
   return out;
 }
 
-Tr_level Tr_newLevel(Tr_level parent, Temp_label name,
-                     U_boolList formals){
-  Tr_level p = checked_malloc(sizeof(*p));
-  p->level = parent->level+1;
-  p->parent = parent;
-  p->frame = F_newFrame(name,formals);
-  return p;
-}
-
-Tr_accessList Tr_formals(Tr_level level){
+static Tr_accessList makeFormalAccessList(Tr_level level){
   F_accessList itlist = F_formals(level->frame);
   Tr_accessList res = NULL;
   for(;itlist != NULL; itlist=itlist->tail){
@@ -74,6 +64,20 @@ Tr_accessList Tr_formals(Tr_level level){
     res = ret;
   }
   return res;
+}
+
+Tr_level Tr_newLevel(Tr_level parent, Temp_label name,
+                     U_boolList formals){
+  Tr_level p = checked_malloc(sizeof(*p));
+  p->level = parent->level+1;
+  p->parent = parent;
+  p->frame = F_newFrame(name,U_BoolList(TRUE,formals));
+  p->formals = makeFormalAccessList(p);
+  return p;
+}
+
+Tr_accessList Tr_formals(Tr_level level){
+  return level->formals;
 }
 
 Tr_access Tr_allocLocal(Tr_level level, bool escape){
@@ -174,7 +178,78 @@ Tr_exp Tr_simpleVar(Tr_access access, Tr_level level){
     fp = T_Mem(T_Binop(T_plus,fp,T_Const(0)));
   return F_Exp(access->access,fp);
 }
+Tr_exp Tr_fieldVar(Tr_exp recordbase, int offset){
+  return Tr_Ex(T_Mem(T_Binop(T_plus,unEx(recordbase),
+                             T_Const(offset*F_wordSize))));
+}
 
-Tr_exp Tr_array() {
+Tr_exp A_subscriptVar(Tr_exp arraybase, Tr_exp index){
+  return Tr_Ex(T_Mem(T_Binop(T_plus,unEx(arraybase),
+                             T_Binop(T_mul,unEx(index),T_Const(F_wordSize)))));
+}
 
+Tr_exp Tr_arrayExp(Tr_exp size, Tr_exp init) {
+  return Tr_Ex(F_externalCall(String("initArray"),
+                              T_ExpList(unEx(size),T_ExpList(unEx(init),NULL))));
+}
+
+// todo
+Tr_exp Tr_recordExp(int n, T_expList list){
+  Temp_temp r = Temp_newtemp();
+  T_stm alloc = T_Move(T_Temp(r),
+                       F_externalCall(String("initRecord"),T_ExpList(T_Const(n*F_wordSize),NULL)));
+
+}
+
+static Temp_temp nilTemp = NULL;
+Tr_exp Tr_nilExp(){
+  if(!nilTemp){
+    nilTemp = Temp_newtemp();
+    T_stm alloc = T_Move(T_Temp(nilTemp),
+                         F_externalCall(String("initRecord"),T_ExpList(T_Const(0*F_wordSize),NULL)));
+    return Tr_Ex(T_Eseq(alloc,T_Temp(nilTemp)));
+  }
+  return Tr_Ex(T_Temp(nilTemp));
+}
+
+Tr_exp Tr_stringExp(string s){
+  Temp_label label = Temp_namedlabel(s);
+  F_frag strflag = F_StringFrag(label,s);
+  F_fragList temp_list = checked_malloc(sizeof(*temp_list));
+  temp_list->head = strflag;
+  temp_list->tail = flist;
+  flist = temp_list;
+  return Tr_Ex(T_Name(label));
+}
+
+// Reverse order
+static T_expList un_Trlist(Tr_expList trlist){
+  T_expList res = NULL;
+  while(trlist){
+    T_expList p = checked_malloc(sizeof(*res));
+    p->head = unEx(trlist->head);
+    p->tail = res;
+    res = p;
+  }
+  return res;
+}
+
+static Tr_exp Get_staticLink(Tr_level funclevel, Tr_level level){
+  T_exp addr = T_Temp(F_FP());
+  T_exp res = NULL;
+  while(funclevel->parent != level){
+    F_access staticlink = F_formals(level->frame)->head;
+    addr = F_Exp(staticlink,addr);
+    level = level->parent;
+  }
+  return Tr_Ex(addr);
+}
+
+Tr_exp Tr_callExp(string funcname, Tr_level funclevel, Tr_level level, Tr_expList argslist){
+  Tr_exp staticlink = Get_staticLink(funclevel, level);
+  Tr_expList p = checked_malloc(sizeof(*p));
+  p->head = staticlink;
+  p->tail = argslist;
+  T_expList argslist1 = un_Trlist(p);
+  return Tr_Ex(T_Call(T_Name(Temp_namedlabel(funcname)),argslist1));
 }

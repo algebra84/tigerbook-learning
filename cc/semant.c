@@ -9,6 +9,7 @@
 #include "translate.h"
 #include "venv.h"
 #include "semant.h"
+#include "frame.h"
 
 struct expty expTy(Tr_exp exp, Ty_ty ty) {
   struct expty e;
@@ -421,12 +422,14 @@ void  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d){
         S_beginScope(venv);
         A_fundec func = funcs->head;
         A_fieldList fields = func->params;
+        E_enventry funentry = S_look(venv,func->name);
+        Tr_accessList formals = Tr_formals(funentry->u.fun.level);
 
         for(;fields != NULL; fields = fields->tail){
           Ty_ty field = S_look(tenv,fields->head->typ);
           if(field) {
-            E_enventry funentry = S_look(venv,func->name);
-            S_enter(venv, fields->head->name, E_VarEntry(Tr_allocLocal(funentry->u.fun.level, TRUE), field));
+            S_enter(venv, fields->head->name, E_VarEntry(formals->head, field));
+            formals=formals->tail;
           }
         }
 
@@ -484,10 +487,10 @@ Ty_ty transTy (S_table venv, S_table tenv, A_ty a){
   }
 }
 
-void SEM_transProg(A_exp prog){
+F_fragList SEM_transProg(A_exp prog){
   S_table venv = E_base_venv();
   S_table tenv = E_base_tenv();
   Tr_level level = Tr_newLevel(Tr_outermost(),Temp_newlabel(),NULL);
   transExp(venv,tenv,level,prog);
-  return;
+  return NULL;
 }

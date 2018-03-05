@@ -59,9 +59,9 @@ F_accessList F_newlist(F_access head, F_accessList tail){
 
 F_frame F_newFrame(Temp_label name, U_boolList formals){
   F_frame p = checked_malloc(sizeof(*p));
-  p->size = 4;
+  p->size = 0;
   p->label = name;
-  p->escapes = formals;
+  p->escapes = formals->tail;
   p->formals = NULL;
   p->locals = NULL;
   p->tmp = NULL;
@@ -71,11 +71,12 @@ F_frame F_newFrame(Temp_label name, U_boolList formals){
   U_boolList itlist = formals;
 
 //  increase offset by F_alloc
-//  // for amd64 0 %ebp = old %EBP, 4 %ebp = %old eip
-//  for(int offset = 8; itlist != NULL; itlist = itlist->tail){
-//    p->formals = F_newlist(InFrame(offset),p->formals);
-//    offset+=4;
-//  }
+  // for amd64 0 %ebp = old %EBP, 4 %ebp = %old eip
+  for(int offset = 0; itlist != NULL; itlist = itlist->tail){
+    p->formals = F_newlist(InFrame(offset),p->formals);
+    offset+=4;
+    p->size+=4;
+  }
   return p;
 }
 
@@ -83,7 +84,7 @@ Temp_label F_name(F_frame f){
   return f->label;
 }
 F_accessList F_formals(F_frame f){
-  return f->formals;
+  return f->formals->tail;
 }
 
 F_access F_allocLocal(F_frame f, bool escape){
@@ -122,5 +123,28 @@ T_exp F_externalCall(string s, T_expList args){
 }
 
 T_stm F_procEntryExit1(F_frame frame, T_stm stm){
+  return stm;
+}
 
+F_frag F_StringFrag(Temp_label label, string str){
+  F_frag p = checked_malloc(sizeof(*p));
+  p->kind = F_stringFrag;
+  p->u.stringg.str = str;
+  p->u.stringg.label = label;
+  return p;
+}
+
+F_frag F_ProcFrag(T_stm body, F_frame frame){
+  F_frag p = checked_malloc(sizeof(*p));
+  p->kind = F_procFrag;
+  p->u.proc.frame = frame;
+  p->u.proc.body = body;
+  return p;
+}
+
+F_fragList F_FragList(F_frag head, F_fragList tail){
+  F_fragList p = checked_malloc(sizeof(*p));
+  p->head = head;
+  p->tail = tail;
+  return p;
 }

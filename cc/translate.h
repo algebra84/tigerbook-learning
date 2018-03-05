@@ -11,6 +11,9 @@ typedef struct Tr_accessList_ *Tr_accessList;
 typedef struct Tr_level_ *Tr_level;
 typedef struct patchList_ *patchList;
 typedef enum{Tr_ex, Tr_nx, Tr_cx} Tr_expkind;
+typedef struct Tr_expList_ *Tr_expList;
+struct Tr_accessList_ {Tr_access head; Tr_accessList tail;};
+struct Tr_expList_ {Tr_exp head; Tr_expList tail;};
 Tr_accessList Tr_AccessList(Tr_access head,
                             Tr_accessList tail);
 
