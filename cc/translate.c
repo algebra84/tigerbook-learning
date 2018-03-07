@@ -101,6 +101,13 @@ patchList joinPatch(patchList first, patchList second){
   return first;
 }
 
+Tr_expList Tr_ExpList(Tr_exp head, Tr_expList tail)
+{
+  Tr_expList p = (Tr_expList) checked_malloc (sizeof(*p));
+  p->head=head; p->tail=tail;
+  return p;
+}
+
 static T_exp unEx(Tr_exp e){
   switch(e->kind){
     case Tr_ex:
@@ -179,6 +186,7 @@ Tr_exp Tr_simpleVar(Tr_access access, Tr_level level){
     fp = T_Mem(T_Binop(T_plus,fp,T_Const(0)));
   return Tr_Ex(F_Exp(access->access,fp));
 }
+
 Tr_exp Tr_fieldVar(Tr_exp recordbase, int offset){
   return Tr_Ex(T_Mem(T_Binop(T_plus,unEx(recordbase),
                              T_Const(offset*F_wordSize))));
@@ -217,6 +225,10 @@ Tr_exp Tr_nilExp(){
     return Tr_Ex(T_Eseq(alloc,T_Temp(nilTemp)));
   }
   return Tr_Ex(T_Temp(nilTemp));
+}
+
+Tr_exp Tr_intExp(int consti){
+  return Tr_Ex(T_Const(consti));
 }
 
 Tr_exp Tr_stringExp(string s){
@@ -293,7 +305,7 @@ Tr_exp Tr_relOpExp(Tr_exp left, Tr_exp right, A_oper op){
 
 }
 
-Tr_exp Tr_strEqExp(A_oper op, Tr_exp left, Tr_exp right){
+Tr_exp Tr_strEqExp(Tr_exp left, Tr_exp right,A_oper op){
   T_exp res = F_externalCall(String("stringEqual"),
                               T_ExpList(unEx(left),
                                         T_ExpList(unEx(right),NULL)));
@@ -354,6 +366,41 @@ Tr_exp Tr_whileExp(Tr_exp condition, Tr_exp body, Temp_label label_done){
 }
 
 // do it in abstract tree
-Tr_exp Tr_forExp(Tr_exp lower, Tr_exp upper, Tr_exp body){
+Tr_exp Tr_forExp(Tr_exp lower, Tr_exp upper,
+                 Tr_exp body,Tr_exp iter, Temp_label label_done){
+  Temp_label label_test = Temp_newlabel();
+  Temp_label label_body = Temp_newlabel();
 
+  T_stm jump_test = T_Jump(T_Name(label_test),Temp_LabelList(label_test,NULL));
+  T_stm stm_body = T_Seq(T_Label(label_body),T_Seq(unNx(body),jump_test));
+
+  T_stm stm_head = T_Move(unEx(iter), unEx(lower));
+  T_stm stm_test = T_Seq(T_Label(label_test),
+                         T_Cjump(T_le,unEx(iter),unEx(upper),label_body,label_done));
+  T_stm stm_done = T_Label(label_done);
+
+  return Tr_Nx(T_Seq(stm_head,T_Seq(stm_test,T_Seq(stm_body,stm_done))));
+}
+
+Tr_exp Tr_breakExp(Temp_label label_done){
+  return Tr_Nx(T_Jump(T_Name(label_done),
+                      Temp_LabelList(label_done, NULL)));
+}
+// for typedec and funcdec
+Tr_exp Tr_nullExp(){
+  return Tr_Ex(T_Const(0));
+}
+
+// reverse order of sequence
+Tr_exp Tr_seqExp(Tr_expList trlist){
+  if(trlist == NULL)
+    return NULL;
+
+  T_exp last_exp = unEx(trlist->head);
+  trlist = trlist->tail;
+  T_stm seq = NULL;
+  for(;trlist; trlist = trlist->tail)
+    seq = T_Seq(unNx(trlist->head),seq);
+
+  return Tr_Ex(T_Eseq(seq, last_exp));
 }
