@@ -250,6 +250,7 @@ static T_expList un_Trlist(Tr_expList trlist){
     p->head = unEx(trlist->head);
     p->tail = res;
     res = p;
+    trlist = trlist->tail;
   }
   return res;
 }
@@ -257,6 +258,7 @@ static T_expList un_Trlist(Tr_expList trlist){
 static Tr_exp Get_staticLink(Tr_level funclevel, Tr_level level){
   T_exp addr = T_Temp(F_FP());
   T_exp res = NULL;
+  // condisder recursive function
   while(funclevel->parent != level){
     F_access staticlink = F_formals(level->frame)->head;
     addr = F_Exp(staticlink,addr);

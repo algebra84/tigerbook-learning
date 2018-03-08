@@ -32,6 +32,7 @@ static void pr_stm(FILE *out, T_stm stm, int d)
 {
   // handle stm->right is NULL
   if (stm == NULL){
+    indent(out,d);
     fprintf(out,"NULL",d+1);
     return;
   }

@@ -547,6 +547,8 @@ Ty_ty transTy (S_table venv, S_table tenv, A_ty a){
 F_fragList SEM_transProg(A_exp prog){
   S_table venv = E_base_venv();
   S_table tenv = E_base_tenv();
+  // set fp register t100
+  F_FP();
   Tr_level level = Tr_newLevel(Tr_outermost(),Temp_newlabel(),NULL);
   struct expty body = transExp(venv,tenv,level,prog,NULL);
   Tr_procEntryExit(level,body.exp,NULL);
