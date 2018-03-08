@@ -407,7 +407,7 @@ Tr_exp Tr_seqExp(Tr_expList trlist){
 }
 
 void Tr_procEntryExit(Tr_level level, Tr_exp body,Tr_accessList formals){
-  F_FragList(F_ProcFrag(unNx(body),level->frame),
+  proclist = F_FragList(F_ProcFrag(unNx(body),level->frame),
              proclist);
 }
 

@@ -30,6 +30,12 @@ static char rel_oper[][12] = {
  
 static void pr_stm(FILE *out, T_stm stm, int d)
 {
+  // handle stm->right is NULL
+  if (stm == NULL){
+    fprintf(out,"NULL",d+1);
+    return;
+  }
+
   switch (stm->kind) {
   case T_SEQ:
     indent(out,d);
