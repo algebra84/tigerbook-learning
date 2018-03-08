@@ -6,11 +6,11 @@
 #include <stdio.h>
 #include "util.h"
 #include "symbol.h"
-#include "temp.h"
-#include "frame.h"
-#include "tree.h"
-#include "translate.h"
 #include "absyn.h"
+#include "temp.h"
+#include "tree.h"
+#include "frame.h"
+#include "translate.h"
 
 struct Tr_level_ {int level; Tr_level parent;F_frame frame;Tr_accessList formals;};
 
@@ -25,7 +25,8 @@ struct Tr_exp_ {
 };
 
 static Tr_level out = NULL;
-static F_fragList flist = NULL;
+static F_fragList proclist = NULL;
+static F_fragList strlist = NULL;
 
 static patchList PatchList(Temp_label *head, patchList tail){
   patchList p = checked_malloc(sizeof(*p));
@@ -236,8 +237,8 @@ Tr_exp Tr_stringExp(string s){
   F_frag strflag = F_StringFrag(label,s);
   F_fragList temp_list = checked_malloc(sizeof(*temp_list));
   temp_list->head = strflag;
-  temp_list->tail = flist;
-  flist = temp_list;
+  temp_list->tail = strlist;
+  strlist = temp_list;
   return Tr_Ex(T_Name(label));
 }
 
@@ -403,4 +404,18 @@ Tr_exp Tr_seqExp(Tr_expList trlist){
     seq = T_Seq(unNx(trlist->head),seq);
 
   return Tr_Ex(T_Eseq(seq, last_exp));
+}
+
+void Tr_procEntryExit(Tr_level level, Tr_exp body,Tr_accessList formals){
+  F_FragList(F_ProcFrag(unNx(body),level->frame),
+             proclist);
+}
+
+F_fragList Tr_getResult(){
+  F_fragList cursor = NULL, prev = NULL;
+  for(cursor = strlist; cursor; cursor = cursor->tail)
+    prev = cursor;
+  if(prev)
+    prev->tail = proclist;
+  return strlist?strlist:proclist;
 }

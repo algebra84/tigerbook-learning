@@ -3,13 +3,14 @@
 #include "util.h"
 #include "symbol.h"
 #include "temp.h"
-#include "frame.h"
 #include "tree.h"
+#include "frame.h"
+
 
 // registers
 static Temp_temp fp = NULL;
 static Temp_temp rv = NULL;
-F_WORD_SIZE = 4;
+const int F_wordSize = 4;
 
 typedef enum {inFrame, inReg} Accesstype;
 struct F_access_
@@ -119,10 +120,18 @@ T_exp F_Exp(F_access acc,T_exp framePtr){
 }
 
 T_exp F_externalCall(string s, T_expList args){
-  return T_Call(Temp_namedlabel(s),args);
+  return T_Call(T_Name(Temp_namedlabel(s)),args);
 }
 
 T_stm F_procEntryExit1(F_frame frame, T_stm stm){
+  return stm;
+}
+
+T_stm F_procEntrypro(F_frame frame, T_stm stm){
+  return stm;
+}
+
+T_stm F_procEntryepi(F_frame frame, T_stm stm){
   return stm;
 }
 

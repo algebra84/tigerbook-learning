@@ -8,6 +8,8 @@
 #include "types.h"
 #include "absyn.h"
 #include "temp.h"
+#include "tree.h"
+#include "frame.h"
 #include "translate.h"
 #include "venv.h"
 #include "semant.h"

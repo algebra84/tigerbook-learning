@@ -9,7 +9,7 @@ typedef enum{F_stringFrag, F_procFrag} Fragkind;
 struct F_frag_ {
     Fragkind kind;
     union{struct {Temp_label label;
-                  string str}stringg;
+                  string str;}stringg;
           struct{T_stm body; F_frame frame;}proc;
     }u;
 };
@@ -32,6 +32,8 @@ extern const int F_wordSize;
 T_exp F_Exp(F_access acc,T_exp framePtr);
 T_exp F_externalCall(string s, T_expList args);
 T_stm F_procEntryExit1(F_frame frame, T_stm stm);
+T_stm F_procEntrypro(F_frame frame, T_stm stm);
+T_stm F_procEntryepi(F_frame frame, T_stm stm);
 F_frag F_StringFrag(Temp_label label, string str);
 F_frag F_ProcFrag(T_stm body, F_frame frame);
 F_fragList F_FragList(F_frag head, F_fragList tail);

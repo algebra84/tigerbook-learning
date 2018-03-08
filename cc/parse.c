@@ -9,10 +9,14 @@
 #include "types.h"
 #include "absyn.h"
 #include "temp.h"
+#include "tree.h"
+#include "frame.h"
 #include "translate.h"
-#include "venv.h"
 #include "semant.h"
+#include "venv.h"
+#include "printtree.h"
 #include "parse.h"
+
 
 extern int yyparse(void);
 extern A_exp absyn_root;
@@ -34,7 +38,7 @@ int main(int argc, char **argv) {
   yyin = stdin;
   yyout = stdout;
   if (argc!=2) {fprintf(stderr,"usage: a.out filename\n"); exit(1);}
-  SEM_transProg(parse(argv[1]));
- 
+  printFragList(stderr,SEM_transProg(parse(argv[1])));
+
   return 0;
 }

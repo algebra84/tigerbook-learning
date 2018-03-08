@@ -122,7 +122,7 @@ T_relOp T_notRel(T_relOp r)
  switch(r)
    {case T_eq: return T_ne;
     case T_ne: return T_eq;
-    case T_lt: return T_ge;c
+    case T_lt: return T_ge;
     case T_ge: return T_lt;
     case T_gt: return T_le;
     case T_le: return T_gt;

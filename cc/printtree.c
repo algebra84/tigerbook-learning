@@ -7,7 +7,11 @@
 #include "symbol.h"
 #include "temp.h"
 #include "tree.h"
+#include "absyn.h"
+#include "frame.h"
+#include "translate.h"
 #include "printtree.h"
+
 
 /* local function prototype */
 static void pr_tree_exp(FILE *out, T_exp exp, int d);
@@ -101,5 +105,20 @@ void printStmList (FILE *out, T_stmList stmList)
 {
   for (; stmList; stmList=stmList->tail) {
     pr_stm(out, stmList->head,0); fprintf(out, "\n");
+  }
+}
+
+void printFragList(FILE *out, F_fragList list){
+  for(;list; list = list->tail){
+    if(list->head->kind == F_stringFrag) {
+      fprintf(out, "stringfrag\n");
+      fprintf(out, list->head->u.stringg.str);
+      fprintf(out,"\n");
+    }
+    else {
+      fprintf(out, "proflag\n");
+      pr_stm(out, list->head->u.proc.body, 0);
+      fprintf(out, "\n");
+    }
   }
 }

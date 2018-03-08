@@ -3,6 +3,9 @@
 #include "symbol.h"
 #include "types.h"
 #include "temp.h"
+#include "absyn.h"
+#include "tree.h"
+#include "frame.h"
 #include "translate.h"
 #include "venv.h"
 

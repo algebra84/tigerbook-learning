@@ -6,10 +6,12 @@
 #include "types.h"
 #include "absyn.h"
 #include "temp.h"
+#include "tree.h"
+#include "frame.h"
 #include "translate.h"
 #include "venv.h"
 #include "semant.h"
-#include "frame.h"
+
 
 struct expty expTy(Tr_exp exp, Ty_ty ty) {
   struct expty e;
@@ -312,9 +314,10 @@ struct expty transExp(S_table venv, S_table tenv,
       S_beginScope(venv);
       A_decList itlist = a->u.let.decs;
       A_dec iter;
+      Tr_expList trlist = NULL;
       for(;itlist != NULL; itlist=itlist->tail){
         iter = itlist->head;
-        transDec(venv,tenv,level,iter,breakk);
+        trlist = Tr_ExpList(transDec(venv,tenv,level,iter,breakk),trlist);
       }
       assert(a->u.let.body->kind == A_seqExp);
       A_expList exprlist = a->u.let.body->u.seq;
@@ -324,9 +327,10 @@ struct expty transExp(S_table venv, S_table tenv,
         exprit = exprlist->head;
         res = transExp(venv,tenv,level,exprit,breakk);
       }
+      trlist = Tr_ExpList(res.exp,trlist);
       S_endScope(venv);
       S_endScope(tenv);
-      return res;
+      return expTy(Tr_seqExp(trlist),res.ty);
     }
     case A_arrayExp:{
       Ty_ty arraytype = actual_ty(S_look(tenv,a->u.array.typ));
@@ -338,7 +342,8 @@ struct expty transExp(S_table venv, S_table tenv,
         EM_error(a->u.array.size->pos,"array size should be int type\n");
       if(!EqualTy(arraytype->u.array,arrayinit.ty))
         EM_error(a->u.array.init->pos, "init type conflit array type\n");
-      return expTy(NULL, arraytype);
+      return expTy(Tr_arrayExp(arraysize.exp,arrayinit.exp),
+                   arraytype);
     }
 
   }
@@ -397,6 +402,7 @@ Tr_exp  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d,Temp_label b
     }
     case A_varDec:{
       struct expty initexp = transExp(venv,tenv,level,d->u.var.init,breakk);
+      Tr_exp res = NULL;
       if(d->u.var.typ){
         Ty_ty vartype = S_look(tenv,d->u.var.typ);
         if(!vartype)
@@ -405,14 +411,18 @@ Tr_exp  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d,Temp_label b
           if (!EqualTy(vartype, initexp.ty))
             EM_error(d->u.var.init->pos,"initial value conflicts type %s\n",
                      S_name(d->u.var.typ));
-            S_enter(venv, d->u.var.var, E_VarEntry(Tr_allocLocal(level,TRUE),vartype));
+          Tr_access ace = Tr_allocLocal(level,TRUE);
+          S_enter(venv, d->u.var.var, E_VarEntry(ace,vartype));
+          res = Tr_assignExp(Tr_simpleVar(ace,level),initexp.exp);
         }
-        break;
+        return res;
       }
       if(initexp.ty->kind == Ty_nil)
         EM_error(d->u.var.init->pos, "unvalid initial exp Nil\n");
-      S_enter(venv, d->u.var.var, E_VarEntry(Tr_allocLocal(level,TRUE),initexp.ty));
-      break;
+      Tr_access ace = Tr_allocLocal(level,TRUE);
+      S_enter(venv, d->u.var.var, E_VarEntry(ace,initexp.ty));
+      res = Tr_assignExp(Tr_simpleVar(ace,level),initexp.exp);
+      return res;
     }
     case A_functionDec:{
 
@@ -456,11 +466,10 @@ Tr_exp  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d,Temp_label b
           formals = Ty_TyList(field,formals);
         }
         Temp_label func_label = Temp_newlabel();
+        Tr_level new_level = Tr_newLevel(level,func_label,ublist);
         S_enter(local_venv,func->name,
-                E_FunEntry(Tr_newLevel(level,func_label,ublist),
-                           func_label,formals, res));
-        S_enter(venv,func->name,E_FunEntry(Tr_newLevel(level,func_label,ublist),
-                                           func_label,formals, res));
+                E_FunEntry(new_level,func_label,formals, res));
+        S_enter(venv,func->name,E_FunEntry(new_level,func_label,formals, res));
       }
 
       // trans body of functions
@@ -479,13 +488,15 @@ Tr_exp  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d,Temp_label b
           }
         }
 
-        struct expty ret = transExp(venv,tenv,level,func->body,breakk);
-        Ty_ty res = ((E_enventry) (S_look(venv,func->name)))->u.fun.result;
+        struct expty ret = transExp(venv,tenv,funentry->u.fun.level,func->body,breakk);
+        Ty_ty res = funentry->u.fun.result;
         if(!EqualTy(res,ret.ty))
           EM_error(func->body->pos,"conflict return type \n");
+        Tr_procEntryExit(funentry->u.fun.level,ret.exp,formals);
         S_endScope(venv);
       }
 
+      return Tr_nullExp();
     }
   }
 }
@@ -537,6 +548,7 @@ F_fragList SEM_transProg(A_exp prog){
   S_table venv = E_base_venv();
   S_table tenv = E_base_tenv();
   Tr_level level = Tr_newLevel(Tr_outermost(),Temp_newlabel(),NULL);
-  transExp(venv,tenv,level,prog,NULL);
-  return NULL;
+  struct expty body = transExp(venv,tenv,level,prog,NULL);
+  Tr_procEntryExit(level,body.exp,NULL);
+  return Tr_getResult();
 }
