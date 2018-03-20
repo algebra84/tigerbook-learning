@@ -1,4 +1,5 @@
 #include <lzma.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include "util.h"
 #include "errormsg.h"
@@ -113,6 +114,7 @@ struct expty transExp(S_table venv, S_table tenv,
     E_enventry call = S_look(venv, a->u.call.func);
     if (call == NULL || call->kind == E_varEntry) {
       EM_error(a->pos, "function %s not defined\n", S_name(a->u.call.func));
+      exit(1);
       return expTy(NULL, Ty_Void());
     }
 
