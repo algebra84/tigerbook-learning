@@ -44,6 +44,7 @@ Tr_exp Tr_forExp(Tr_exp lower, Tr_exp upper,
                  Tr_exp body,Tr_exp iter, Temp_label label_done);
 Tr_exp Tr_breakExp(Temp_label label_done);
 Tr_exp Tr_nullExp(void);
+Tr_exp Tr_novalueExp(void);
 
 void Tr_procEntryExit(Tr_level level, Tr_exp body, Tr_accessList formals);
 F_fragList Tr_getResult(void);

@@ -111,49 +111,49 @@ Tr_expList Tr_ExpList(Tr_exp head, Tr_expList tail)
 
 static T_exp unEx(Tr_exp e){
   switch(e->kind){
-    case Tr_ex:
-      return e->u.ex;
-    case Tr_cx: {
-      Temp_temp r = Temp_newtemp();
-      Temp_label t = Temp_newlabel(), f = Temp_newlabel();
-      doPatch(e->u.cx.trues, t);
-      doPatch(e->u.cx.falses, f);
-      return T_Eseq(T_Move(T_Temp(r), T_Const(1)),
-                    T_Eseq(e->u.cx.stm,
-                           T_Eseq(T_Label(f),
-                                  T_Eseq(T_Move(T_Temp(r), T_Const(0)),
-                                         T_Eseq(T_Label(t), T_Temp(r))))));
-    }
-    case Tr_nx:
-      return T_Eseq(e->u.nx,T_Const(0));
+  case Tr_ex:
+    return e->u.ex;
+  case Tr_cx: {
+    Temp_temp r = Temp_newtemp();
+    Temp_label t = Temp_newlabel(), f = Temp_newlabel();
+    doPatch(e->u.cx.trues, t);
+    doPatch(e->u.cx.falses, f);
+    return T_Eseq(T_Move(T_Temp(r), T_Const(1)),
+                  T_Eseq(e->u.cx.stm,
+                         T_Eseq(T_Label(f),
+                                T_Eseq(T_Move(T_Temp(r), T_Const(0)),
+                                       T_Eseq(T_Label(t), T_Temp(r))))));
+  }
+  case Tr_nx:
+    return T_Eseq(e->u.nx,T_Const(0));
   }
   assert(0);
 }
 
 static T_stm unNx(Tr_exp e){
   switch(e->kind){
-    case Tr_ex:
-      return T_Exp(e->u.ex);
-    case Tr_nx:
-      return e->u.nx;
-    case Tr_cx:
-      return e->u.cx.stm;
+  case Tr_ex:
+    return T_Exp(e->u.ex);
+  case Tr_nx:
+    return e->u.nx;
+  case Tr_cx:
+    return e->u.cx.stm;
   }
   assert(0);
 }
 
 static struct Cx unCx(Tr_exp e){
   switch(e->kind){
-    case Tr_cx:
-      return e->u.cx;
-    case Tr_ex:{
-      struct Cx res;
-      res.stm = T_Cjump(T_eq,e->u.ex,T_Const(0),NULL,NULL);
-      res.trues = PatchList(&(res.stm->u.CJUMP.true),NULL);
-      res.falses = PatchList(&(res.stm->u.CJUMP.false),NULL);
-      return res;
-    }
-    default: assert(0);
+  case Tr_cx:
+    return e->u.cx;
+  case Tr_ex:{
+    struct Cx res;
+    res.stm = T_Cjump(T_eq,e->u.ex,T_Const(0),NULL,NULL);
+    res.trues = PatchList(&(res.stm->u.CJUMP.true),NULL);
+    res.falses = PatchList(&(res.stm->u.CJUMP.false),NULL);
+    return res;
+  }
+  default: assert(0);
   }
 }
 
@@ -279,11 +279,11 @@ Tr_exp Tr_callExp(string funcname, Tr_level funclevel, Tr_level level, Tr_expLis
 Tr_exp Tr_arithExp(Tr_exp left, Tr_exp right, A_oper op){
   T_binOp binop;
   switch(op){
-    case A_plusOp: binop = T_plus; break;
-    case A_minusOp: binop = T_minus; break;
-    case A_timesOp: binop = T_mul; break;
-    case A_divideOp: binop = T_div; break;
-    default: assert(0);
+  case A_plusOp: binop = T_plus; break;
+  case A_minusOp: binop = T_minus; break;
+  case A_timesOp: binop = T_mul; break;
+  case A_divideOp: binop = T_div; break;
+  default: assert(0);
   }
 
   return Tr_Ex(T_Binop(binop,unEx(left),unEx(right)));
@@ -292,13 +292,13 @@ Tr_exp Tr_arithExp(Tr_exp left, Tr_exp right, A_oper op){
 Tr_exp Tr_relOpExp(Tr_exp left, Tr_exp right, A_oper op){
   T_relOp binop;
   switch(op){
-    case A_gtOp: binop = T_gt; break;
-    case A_geOp: binop = T_ge; break;
-    case A_leOp: binop = T_le; break;
-    case A_ltOp: binop = T_lt; break;
-    case A_eqOp: binop = T_eq; break;
-    case A_neqOp: binop = T_ne; break;
-    default: assert(0);
+  case A_gtOp: binop = T_gt; break;
+  case A_geOp: binop = T_ge; break;
+  case A_leOp: binop = T_le; break;
+  case A_ltOp: binop = T_lt; break;
+  case A_eqOp: binop = T_eq; break;
+  case A_neqOp: binop = T_ne; break;
+  default: assert(0);
   }
 
   T_stm stm = T_Cjump(binop,unEx(left),unEx(right),NULL,NULL);
@@ -310,8 +310,8 @@ Tr_exp Tr_relOpExp(Tr_exp left, Tr_exp right, A_oper op){
 
 Tr_exp Tr_strEqExp(Tr_exp left, Tr_exp right,A_oper op){
   T_exp res = F_externalCall(String("stringEqual"),
-                              T_ExpList(unEx(left),
-                                        T_ExpList(unEx(right),NULL)));
+                             T_ExpList(unEx(left),
+                                       T_ExpList(unEx(right),NULL)));
   if(op == A_eqOp)
     return Tr_Ex(res);
   T_exp e = T_Binop(T_minus, T_Const(1),res);
@@ -394,6 +394,10 @@ Tr_exp Tr_nullExp(){
   return Tr_Ex(T_Const(0));
 }
 
+Tr_exp Tr_novalueExp(){
+  return Tr_Nx(T_Exp(T_Const(1)));
+}
+
 // reverse order of sequence
 Tr_exp Tr_seqExp(Tr_expList trlist){
   if(trlist == NULL)
@@ -410,7 +414,7 @@ Tr_exp Tr_seqExp(Tr_expList trlist){
 
 void Tr_procEntryExit(Tr_level level, Tr_exp body,Tr_accessList formals){
   proclist = F_FragList(F_ProcFrag(unNx(body),level->frame),
-             proclist);
+                        proclist);
 }
 
 F_fragList Tr_getResult(){
