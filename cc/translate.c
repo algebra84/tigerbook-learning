@@ -184,7 +184,7 @@ static Tr_exp Tr_Cx(patchList trues, patchList falses, T_stm stm){
 Tr_exp Tr_simpleVar(Tr_access access, Tr_level level){
   Tr_level acc_level = access->level;
   T_exp fp = T_Temp(F_FP());
-  for(; acc_level != level; acc_level = acc_level->parent)
+  for(; acc_level != level; level = level->parent)
     fp = T_Mem(T_Binop(T_plus,fp,T_Const(0)));
   return Tr_Ex(F_Exp(access->access,fp));
 }

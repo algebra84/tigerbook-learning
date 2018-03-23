@@ -178,10 +178,10 @@ struct expty transExp(S_table venv, S_table tenv,
                      Ty_Int());
 
       if(!EqualTy(left.ty,right.ty)
-         || left.ty->kind != Ty_int
-         || left.ty->kind != Ty_record
-         || left.ty->kind != Ty_array
-         || left.ty->kind != Ty_name)
+         || (left.ty->kind != Ty_int
+             && left.ty->kind != Ty_record
+             &&  left.ty->kind != Ty_array
+             && left.ty->kind != Ty_name))
         EM_error(a->u.op.left->pos,"comparison of imcompatible types\n");
 
       return expTy(Tr_relOpExp(left.exp,right.exp,oper), Ty_Int());
