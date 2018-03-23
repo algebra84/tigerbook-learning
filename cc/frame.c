@@ -78,6 +78,13 @@ F_frame F_newFrame(Temp_label name, U_boolList formals){
     offset+=4;
     p->size+=4;
   }
+
+  //reverse formal's order
+  F_accessList tmp = p->formals;
+  p->formals = NULL;
+  for(; tmp; tmp = tmp->tail)
+    p->formals = F_newlist(tmp->head,p->formals);
+
   return p;
 }
 

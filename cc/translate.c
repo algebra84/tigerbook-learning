@@ -58,13 +58,14 @@ static Tr_accessList makeFormalAccessList(Tr_level level){
   Tr_accessList res = NULL;
   for(;itlist != NULL; itlist=itlist->tail){
     Tr_access p = checked_malloc(sizeof(*p));
-    Tr_accessList ret = checked_malloc(sizeof(*ret));
     p->access = itlist->head;
     p->level = level;
-    ret->head = p;
-    ret->tail = res;
-    res = ret;
+    res = Tr_AccessList(p, res);
   }
+  Tr_accessList tmp = res;
+  res = NULL;
+  for(;tmp ; tmp=tmp->tail)
+    res = Tr_AccessList(tmp->head,res);
   return res;
 }
 
@@ -398,6 +399,9 @@ Tr_exp Tr_novalueExp(){
   return Tr_Nx(T_Exp(T_Const(1)));
 }
 
+Tr_exp Tr_errExp(){
+  return Tr_Nx(T_Exp(T_Const(-1)));
+}
 // reverse order of sequence
 Tr_exp Tr_seqExp(Tr_expList trlist){
   if(trlist == NULL)

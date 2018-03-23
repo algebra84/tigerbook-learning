@@ -58,7 +58,7 @@ struct expty transVar(S_table venv, S_table tenv, Tr_level level,A_var v){
                    actual_ty(x->u.var.ty));
     else{
       EM_error(v->pos,"undefined variable %s",S_name(v->u.simple));
-      return expTy(NULL,Ty_Void());
+      return expTy(Tr_errExp(),Ty_Void());
     }
   }
   case A_fieldVar:{
@@ -77,18 +77,18 @@ struct expty transVar(S_table venv, S_table tenv, Tr_level level,A_var v){
     }
     else
       EM_error(v->pos,"variable not record\n");
-    return expTy(NULL, Ty_Void());
+    return expTy(Tr_errExp(), Ty_Void());
   }
   case A_subscriptVar:{
     struct expty arraytype = transVar(venv,tenv,level,v->u.subscript.var);
     struct expty arrayexp = transExp(venv,tenv,level,v->u.subscript.exp,NULL);
     if(arraytype.ty->kind != Ty_array) {
       EM_error(v->u.subscript.var->pos, "value is not array\n");
-      return expTy(NULL,actual_ty(arraytype.ty->u.array));
+      return expTy(Tr_errExp(),actual_ty(arraytype.ty->u.array));
     }
     if(arrayexp.ty->kind != Ty_int) {
       EM_error(v->u.subscript.exp->pos, "subscript should result int\n");
-      return expTy(NULL,actual_ty(arraytype.ty->u.array));
+      return expTy(Tr_errExp(),actual_ty(arraytype.ty->u.array));
     }
     return expTy(Tr_subscriptVar(arraytype.exp,arrayexp.exp),
                  actual_ty(arraytype.ty->u.array));
@@ -114,8 +114,7 @@ struct expty transExp(S_table venv, S_table tenv,
     E_enventry call = S_look(venv, a->u.call.func);
     if (call == NULL || call->kind == E_varEntry) {
       EM_error(a->pos, "function %s not defined\n", S_name(a->u.call.func));
-      exit(1);
-      return expTy(NULL, Ty_Void());
+      return expTy(Tr_errExp(), Ty_Void());
     }
 
     A_expList iterlist = a->u.call.args;
@@ -193,7 +192,7 @@ struct expty transExp(S_table venv, S_table tenv,
     Ty_ty recordtype = actual_ty(S_look(tenv,a->u.record.typ));
     if(!recordtype) {
       EM_error(a->pos, "%s is not record type\n", S_name(a->u.record.typ));
-      return expTy(NULL, Ty_Record(NULL));
+      return expTy(Tr_errExp(), Ty_Record(NULL));
     }
     A_efieldList itlist = a->u.record.fields;
     Ty_fieldList tylist = recordtype->u.record;
@@ -238,7 +237,7 @@ struct expty transExp(S_table venv, S_table tenv,
       if(!itlist->tail)
         return expTy(Tr_seqExp(trlist), res.ty);
     }
-    return expTy(NULL, Ty_Void());
+    return expTy(Tr_novalueExp(), Ty_Void());
   }
   case A_assignExp:{
     struct expty left = transVar(venv,tenv,level,a->u.assign.var);
