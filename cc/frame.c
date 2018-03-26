@@ -91,8 +91,10 @@ F_frame F_newFrame(Temp_label name, U_boolList formals){
 Temp_label F_name(F_frame f){
   return f->label;
 }
+
+// return formals include staticlink
 F_accessList F_formals(F_frame f){
-  return f->formals->tail;
+  return f->formals;
 }
 
 F_access F_allocLocal(F_frame f, bool escape){

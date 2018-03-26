@@ -54,7 +54,7 @@ Tr_level Tr_outermost(void){
 }
 
 static Tr_accessList makeFormalAccessList(Tr_level level){
-  F_accessList itlist = F_formals(level->frame);
+  F_accessList itlist = F_formals(level->frame)->tail;
   Tr_accessList res = NULL;
   for(;itlist != NULL; itlist=itlist->tail){
     Tr_access p = checked_malloc(sizeof(*p));

@@ -45,71 +45,105 @@ S_table E_base_tenv(){
 /* E_ enventry environment */
 S_table E_base_venv(){
   S_table t = S_empty();
-  // print(s:string) 
+  Temp_label func_label = NULL;
+  Tr_level new_level = NULL;
+  U_boolList ublist = NULL;
+
+  // print(s:string)
+  func_label = Temp_newlabel();
+  ublist = U_BoolList(TRUE,NULL);
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   Ty_tyList formals = Ty_TyList(Ty_String(),NULL);
   Ty_ty result = Ty_Void();
-  E_enventry func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  E_enventry func = E_FunEntry(new_level,func_label,
                                formals, result);
   S_enter(t,S_Symbol("print"),func);
 
   //flush() function
   formals = NULL;
+  ublist = NULL;
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Void();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("flush"),func);
 
   //getchar() :string
   formals = NULL;
+  ublist = NULL;
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("getchar"),func);
 
   // chr(i: int) :string
   formals = Ty_TyList(Ty_Int(), NULL);
+  ublist = U_BoolList(TRUE,NULL);
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("chr"),func);
 
   //size(s:string) :int
   formals = Ty_TyList(Ty_String(), NULL);
+  ublist = U_BoolList(TRUE, NULL);
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Int();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("size"),func);
 
   //ord(s:string) :int
   formals = Ty_TyList(Ty_String(), NULL);
+  ublist = U_BoolList(TRUE, NULL);
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Int();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("ord"),func);
 
   //substring(s:string,first:int, n:int) :string
   formals = Ty_TyList(Ty_String(), Ty_TyList(Ty_Int(),Ty_TyList(Ty_Int(),NULL)));
+  ublist = U_BoolList(TRUE, U_BoolList(TRUE, U_BoolList(TRUE, NULL)));
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("substring"),func);
 
   // concat(s1:string, s2:string):string
   formals = Ty_TyList(Ty_String(), Ty_TyList(Ty_String(),NULL));
+  ublist = U_BoolList(TRUE, U_BoolList(TRUE, NULL));
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("concat"),func);
   // not(i:integer):integer
   formals = Ty_TyList(Ty_Int(),NULL);
+  ublist = U_BoolList(TRUE, NULL);
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Int();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("not"),func);
   // exit(i:int)
   formals = Ty_TyList(Ty_Int(), NULL);
+  ublist = U_BoolList(TRUE, NULL);
+  func_label = Temp_newlabel();
+  new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Void();
-  func = E_FunEntry(Tr_outermost(),Temp_newlabel(),
+  func = E_FunEntry(new_level,func_label,
                     formals, result);
   S_enter(t,S_Symbol("exit"),func);
 
