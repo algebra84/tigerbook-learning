@@ -1,3 +1,5 @@
+#ifndef CC_TEMP_H
+#define CC_TEMP_H
 /*
  * temp.h 
  *
@@ -28,3 +30,4 @@ void Temp_dumpMap(FILE *out, Temp_map m);
 
 Temp_map Temp_name(void);
 
+#endif

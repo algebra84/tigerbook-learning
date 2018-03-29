@@ -1,3 +1,5 @@
+#ifndef CC_TYPE_H
+#define CC_TYPE_H
 /*
  * types.h - 
  *
@@ -37,3 +39,5 @@ Ty_fieldList Ty_FieldList(Ty_field head, Ty_fieldList tail);
 
 void Ty_print(Ty_ty t);
 void TyList_print(Ty_tyList list);
+
+#endif

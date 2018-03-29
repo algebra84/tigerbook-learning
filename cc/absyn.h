@@ -1,3 +1,5 @@
+#ifndef CC_ABSYN_H
+#define CC_ABSYN_H
 /*
  * absyn.h - Abstract Syntax Header (Chapter 4)
  *
@@ -107,6 +109,7 @@ A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp);
 A_exp A_VarExp(A_pos pos, A_var var);
 A_exp A_NilExp(A_pos pos);
 A_exp A_IntExp(A_pos pos, int i);
+A_exp A_NoValue(A_pos pos);
 A_exp A_StringExp(A_pos pos, string s);
 A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args);
 A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right);
@@ -136,3 +139,5 @@ A_namety A_Namety(S_symbol name, A_ty ty);
 A_nametyList A_NametyList(A_namety head, A_nametyList tail);
 A_efield A_Efield(S_symbol name, A_exp exp);
 A_efieldList A_EfieldList(A_efield head, A_efieldList tail);
+
+#endif

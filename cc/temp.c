@@ -23,8 +23,8 @@ static int labels = 0;
 
 Temp_label Temp_newlabel(void)
 {char buf[100];
- sprintf(buf,"L%d",labels++);
- return Temp_namedlabel(String(buf));
+  sprintf(buf,"L%d",labels++);
+  return Temp_namedlabel(String(buf));
 }
 
 /* The label will be created only if it is not found. */
@@ -36,12 +36,12 @@ static int temps = 100;
 
 Temp_temp Temp_newtemp(void)
 {Temp_temp p = (Temp_temp) checked_malloc(sizeof (*p));
- p->num=temps++;
- {char r[16];
-  sprintf(r, "%d", p->num);
-  Temp_enter(Temp_name(), p, String(r));
- }
- return p;
+  p->num=temps++;
+  {char r[16];
+    sprintf(r, "%d", p->num);
+    Temp_enter(Temp_name(), p, String(r));
+  }
+  return p;
 }
 
 
@@ -50,9 +50,9 @@ struct Temp_map_ {TAB_table tab; Temp_map under;};
 
 
 Temp_map Temp_name(void) {
- static Temp_map m = NULL;
- if (!m) m=Temp_empty();
- return m;
+  static Temp_map m = NULL;
+  if (!m) m=Temp_empty();
+  return m;
 }
 
 Temp_map newMap(TAB_table tab, Temp_map under) {
@@ -68,7 +68,7 @@ Temp_map Temp_empty(void) {
 
 Temp_map Temp_layerMap(Temp_map over, Temp_map under) {
   if (over==NULL)
-      return under;
+    return under;
   else return newMap(over->tab, Temp_layerMap(over->under, under));
 }
 
@@ -88,14 +88,14 @@ string Temp_look(Temp_map m, Temp_temp t) {
 
 Temp_tempList Temp_TempList(Temp_temp h, Temp_tempList t) 
 {Temp_tempList p = (Temp_tempList) checked_malloc(sizeof (*p));
- p->head=h; p->tail=t;
- return p;
+  p->head=h; p->tail=t;
+  return p;
 }
 
 Temp_labelList Temp_LabelList(Temp_label h, Temp_labelList t)
 {Temp_labelList p = (Temp_labelList) checked_malloc(sizeof (*p));
- p->head=h; p->tail=t;
- return p;
+  p->head=h; p->tail=t;
+  return p;
 }
 
 static FILE *outfile;
@@ -107,7 +107,7 @@ void Temp_dumpMap(FILE *out, Temp_map m) {
   outfile=out;
   TAB_dump(m->tab,(void (*)(void *, void*))showit);
   if (m->under) {
-     fprintf(out,"---------\n");
-     Temp_dumpMap(out,m->under);
+    fprintf(out,"---------\n");
+    Temp_dumpMap(out,m->under);
   }
 }

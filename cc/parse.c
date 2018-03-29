@@ -1,7 +1,7 @@
 /*
  * parse.c - Parse source file.
  */
-
+#include <stdlib.h>
 #include <stdio.h>
 #include "util.h"
 #include "errormsg.h"
@@ -25,13 +25,13 @@ extern FILE* yyin, *yyout;
    return abstract syntax data structure */
 A_exp parse(string fname) 
 {EM_reset(fname);
- if (yyparse() == 0) /* parsing worked */
-   {
-     fprintf(stderr, "parsing success!\n");
-     return absyn_root;
-   }
- fprintf(stderr, "parsing failed");
- return NULL;
+  if (yyparse() == 0) /* parsing worked */
+    {
+      fprintf(stderr, "parsing success!\n");
+      return absyn_root;
+    }
+  fprintf(stderr, "parsing failed");
+  return NULL;
 }
 
 int main(int argc, char **argv) {

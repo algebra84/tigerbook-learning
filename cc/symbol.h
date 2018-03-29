@@ -1,3 +1,5 @@
+#ifndef CC_SYMBOL_H
+#define CC_SYMBOL_H
 /*
  * symbol.h - Symbols and symbol-tables
  *
@@ -35,3 +37,4 @@ void S_beginScope(S_table t);
    and end the current scope. */
 void S_endScope(S_table t);
 
+#endif

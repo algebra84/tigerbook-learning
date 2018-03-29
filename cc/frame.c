@@ -15,24 +15,24 @@ const int F_wordSize = 4;
 typedef enum {inFrame, inReg} Accesstype;
 struct F_access_
 {Accesstype kind;
-    union {
-        int offset;
-        /* InFrame */
-        Temp_temp reg;
-        /* InReg */
+  union {
+    int offset;
+    /* InFrame */
+    Temp_temp reg;
+    /* InReg */
 
-    } u;
+  } u;
 };
 
 struct F_frame_ {
-    size_t size;
-    Temp_label label;
-    F_accessList formals;
-    U_boolList escapes;
-    F_accessList locals;
-    F_accessList tmp;
-    F_accessList savedRegs;
-    F_accessList argsPass;
+  size_t size;
+  Temp_label label;
+  F_accessList formals;
+  U_boolList escapes;
+  F_accessList locals;
+  F_accessList tmp;
+  F_accessList savedRegs;
+  F_accessList argsPass;
 };
 
 
@@ -71,7 +71,7 @@ F_frame F_newFrame(Temp_label name, U_boolList formals){
 
   U_boolList itlist = formals;
 
-//  increase offset by F_alloc
+  //  increase offset by F_alloc
   // for amd64 0 %ebp = old %EBP, 4 %ebp = %old eip
   for(int offset = 0; itlist != NULL; itlist = itlist->tail){
     p->formals = F_newlist(InFrame(offset),p->formals);
