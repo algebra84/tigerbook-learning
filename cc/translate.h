@@ -39,6 +39,7 @@ Tr_exp Tr_relOpExp(Tr_exp left, Tr_exp right, A_oper op);
 Tr_exp Tr_strEqExp(Tr_exp left, Tr_exp right, A_oper op);
 Tr_exp Tr_assignExp(Tr_exp left, Tr_exp right);
 Tr_exp Tr_ifExp(Tr_exp condition, Tr_exp thenn, Tr_exp elsee);
+Tr_exp Tr_ifExp1(Tr_exp condition, Tr_exp thenn, Tr_exp elsee);
 Tr_exp Tr_whileExp(Tr_exp condition, Tr_exp body, Temp_label label_done);
 Tr_exp Tr_forExp(Tr_exp lower, Tr_exp upper,
                  Tr_exp body,Tr_exp iter, Temp_label label_done);

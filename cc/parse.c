@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
   yyin = stdin;
   yyout = stdout;
   if (argc!=2) {fprintf(stderr,"usage: a.out filename\n"); exit(1);}
-  printFragList(stderr,SEM_transProg(parse(argv[1])));
+  printFragList(stdout,SEM_transProg(parse(argv[1])));
 
   return 0;
 }
