@@ -1,5 +1,5 @@
-tcc:  parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o
-	cc -g parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o -o tcc
+tcc:  parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o
+	cc -g parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o -o tcc
 
 parse.o: parse.c errormsg.h util.h
 	cc -g -c parse.c
@@ -64,5 +64,8 @@ tree.o: tree.c
 util.o: util.c util.h
 	cc -g -c util.c
 
+cannon.o: canon.c canon.h
+	cc -g -c canon.c
+
 clean: 
-	rm -f tcc  util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o absyn.o parse.o symbol.o table.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o
+	rm -f tcc  util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o absyn.o parse.o symbol.o table.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o
