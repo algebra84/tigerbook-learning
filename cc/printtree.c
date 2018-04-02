@@ -127,8 +127,7 @@ void printFragList(FILE *out, F_fragList list){
   for(;list; list = list->tail){
     if(list->head->kind == F_stringFrag) {
       fprintf(out, "stringfrag\n");
-      fprintf(out, list->head->u.stringg.str);
-      fprintf(out,"\n");
+      fprintf(out, "%s\n",list->head->u.stringg.str);
     }
     else {
       fprintf(out, "proflag\n");

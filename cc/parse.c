@@ -15,6 +15,7 @@
 #include "semant.h"
 #include "venv.h"
 #include "printtree.h"
+#include "canon.h"
 #include "parse.h"
 
 
@@ -38,7 +39,15 @@ int main(int argc, char **argv) {
   yyin = stdin;
   yyout = stdout;
   if (argc!=2) {fprintf(stderr,"usage: a.out filename\n"); exit(1);}
-  printFragList(stdout,SEM_transProg(parse(argv[1])));
+  F_fragList f_proc = SEM_transProg(parse(argv[1]));
+  F_fragList iter = f_proc;
+  for(; iter; iter = iter->tail){
+    if(iter->head->kind == F_stringFrag)
+      continue;
+    T_stmList t_proc = C_linearize(iter->head->u.proc.body);
+    fprintf(stdout,"%s\n",S_name(F_name(iter->head->u.proc.frame)));
+    printStmList(stdout,t_proc);
+  }
 
   return 0;
 }

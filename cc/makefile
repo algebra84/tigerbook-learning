@@ -64,7 +64,7 @@ tree.o: tree.c
 util.o: util.c util.h
 	cc -g -c util.c
 
-cannon.o: canon.c canon.h
+canon.o: canon.c canon.h
 	cc -g -c canon.c
 
 clean: 

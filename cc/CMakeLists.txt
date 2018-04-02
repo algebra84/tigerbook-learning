@@ -27,6 +27,8 @@ add_executable(cc
         types.h
         util.c
         util.h
+        canon.c
+        canon.h
         venv.c
         printtree.c
         printtree.h

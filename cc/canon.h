@@ -1,3 +1,5 @@
+#ifndef CC_CANON_H
+#define CC_CANON_H
 /*
  * canon.h - Definitions for canon.c which converts the IR trees into
  *           basic blocks and traces.
@@ -39,3 +41,4 @@ T_stmList C_traceSchedule(struct C_block b);
    as possible are eliminated by falling through into T.LABEL(lab).
 */
 
+#endif
