@@ -111,13 +111,13 @@ static struct stmExp do_exp(T_exp exp)
 /* processes stm so that it contains no ESEQ nodes */
 static T_stm do_stm(T_stm stm)
 {
-  //SEQ.RIGHT could be NULL
-  if(!stm)
-    return NULL;
-
   switch (stm->kind) {
-  case T_SEQ: 
-    return seq(do_stm(stm->u.SEQ.left), do_stm(stm->u.SEQ.right));
+  case T_SEQ: {
+    // handle SEQ(stm, NULL)
+    if(stm->u.SEQ.right)
+      return seq(do_stm(stm->u.SEQ.left), do_stm(stm->u.SEQ.right));
+    return do_stm(stm->u.SEQ.left);
+  }
   case T_JUMP:
     return seq(reorder(ExpRefList(&stm->u.JUMP.exp, NULL)), stm);
   case T_CJUMP:

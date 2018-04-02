@@ -255,12 +255,12 @@ struct expty transExp(S_table venv, S_table tenv,
       struct expty eelse = transExp(venv, tenv, level, a->u.iff.elsee,breakk);
       if(!EqualTy(tthen.ty,eelse.ty))
         EM_error(a->u.iff.then->pos,"types of then - else differ\n");
-      return expTy(Tr_ifExp(condition.exp,tthen.exp,eelse.exp),
+      return expTy(Tr_ifExp1(condition.exp,tthen.exp,eelse.exp),
                    tthen.ty);
     }
     if(tthen.ty->kind != Ty_void)
       EM_error(a->u.iff.then->pos,"then should produced no value\n");
-    return expTy(Tr_ifExp(condition.exp,tthen.exp,NULL), Ty_Void());
+    return expTy(Tr_ifExp1(condition.exp,tthen.exp,NULL), Ty_Void());
   }
   case A_whileExp:{
     struct expty condition = transExp(venv,tenv,level,a->u.whilee.test,breakk);
