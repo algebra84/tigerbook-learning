@@ -354,65 +354,69 @@ Tr_exp Tr_ifExp(Tr_exp condition, Tr_exp thenn, Tr_exp elsee){
 }
 // handle cx/nx type
 Tr_exp Tr_ifExp1(Tr_exp condition, Tr_exp thenn, Tr_exp elsee){
-  patchList trues = unCx(condition).trues;
-  patchList falses = unCx(condition).falses;
+  struct Cx condition_cx = unCx(condition);
+  patchList trues = condition_cx.trues;
+  patchList falses = condition_cx.falses;
 
   Temp_label label_then = Temp_newlabel();
   Temp_label label_else = Temp_newlabel();
-  // if-then
-  if(!elsee){
-    T_stm seq = T_Seq(T_Label(label_then),T_Seq(unNx(thenn),T_Label(label_then)));
-    doPatch(trues,label_then);
-    doPatch(trues,label_else);
-    return Tr_Nx(T_Seq(unCx(condition).stm,seq));
-  }
 
-  // if-then-else
+
   Temp_label label_join = Temp_newlabel();
   T_exp r = T_Temp(Temp_newtemp());
   T_stm joinjump = T_Jump(T_Name(label_join),Temp_LabelList(label_join,NULL));
+  T_stm joinbb = T_Seq(T_Label(label_join),T_Exp(T_Const(0)));
+
+  // if-then
+  if(!elsee){
+    T_stm thenStmt = T_Seq(T_Label(label_then),T_Seq(unNx(thenn),joinjump));
+    T_stm elseStmt = joinbb;
+    doPatch(trues,label_then);
+    doPatch(falses,label_join);
+    return Tr_Nx(T_Seq(condition_cx.stm,T_Seq(thenStmt,elseStmt)));
+  }
+
+  // handle a & b, a | b
+  if(thenn->kind == Tr_cx && elsee->kind == Tr_ex
+     && unEx(elsee)->kind == T_CONST
+     && unEx(elsee)->u.CONST == 0){
+    doPatch(trues,label_then);
+    patchList new_trues = unCx(thenn).trues;
+    joinPatch(falses,unCx(thenn).falses);
+    return Tr_Cx(new_trues,falses,
+                 T_Seq(condition_cx.stm,
+                       T_Seq(T_Label(label_then),thenn->u.cx.stm)));
+  }
+
+  if(thenn->kind == Tr_ex && elsee->kind == Tr_cx
+     && unEx(thenn)->kind == T_CONST
+     && unEx(thenn)->u.CONST == 1){
+    doPatch(falses,label_else);
+    joinPatch(trues,unCx(elsee).trues);
+    patchList new_falses = unCx(elsee).falses;
+    Tr_Cx(trues,new_falses,
+          T_Seq(condition_cx.stm,T_Seq(T_Label(label_else),elsee->u.cx.stm)));
+  }
+
 
   doPatch(trues,label_then);
   doPatch(falses,label_else);
 
-  // must be the same return type
+  // Tr_nx without return value
   if(thenn->kind == Tr_nx && elsee->kind == Tr_nx){
-    T_stm stm_then = T_Seq(T_Label(label_then),unNx(thenn));
-    T_stm stm_else = T_Seq(T_Label(label_else),unNx(elsee));
-    return Tr_Nx(T_Seq(unCx(condition).stm,T_Seq(stm_then,stm_else)));
+    T_stm stm_then = T_Seq(T_Label(label_then),T_Seq(unNx(thenn),joinjump));
+    T_stm stm_else = T_Seq(T_Label(label_else),T_Seq(unNx(elsee),joinjump));
+    return Tr_Nx(T_Seq(T_Seq(condition_cx.stm,T_Seq(stm_then,stm_else)),joinbb));
   }
 
+  // Tr_ex with return value
   T_stm stm_else;
   T_stm stm_then;
-  if(thenn->kind == Tr_cx) {
-    Temp_label trues_then = Temp_newlabel();
-    Temp_label falses_then = Temp_newlabel();
-    doPatch(thenn->u.cx.trues, trues_then);
-    doPatch(thenn->u.cx.falses, falses_then);
-    stm_then = T_Seq(T_Seq(T_Label(label_then),
-                           T_Seq(unCx(thenn).stm,
-                                 T_Seq(T_Seq(T_Label(trues_then), T_Move(r, T_Const(1))),
-                                       T_Seq(T_Label(falses_then), T_Move(r, T_Const(0)))))),
-                     joinjump);
-  }
-  else
-    stm_then = T_Seq(T_Label(label_then),T_Seq(T_Move(r,unEx(thenn)),joinjump));
 
-  if(elsee->kind == Tr_cx){
-    Temp_label trues_else = Temp_newlabel();
-    Temp_label falses_else = Temp_newlabel();
-    doPatch(elsee->u.cx.trues,trues_else);
-    doPatch(elsee->u.cx.falses,falses_else);
-    stm_else = T_Seq(T_Seq(T_Label(label_else),
-                           T_Seq(unCx(elsee).stm,
-                                 T_Seq(T_Seq(T_Label(trues_else),T_Move(r,T_Const(1))),
-                                       T_Seq(T_Label(falses_else),T_Move(r,T_Const(0)))))),
-                     joinjump);
-  }
-  else
-    stm_else = T_Seq(T_Label(label_else), T_Seq(T_Move(r, unEx(elsee)), joinjump));
+  stm_then = T_Seq(T_Label(label_then),T_Seq(T_Move(r,unEx(thenn)),joinjump));
+  stm_else = T_Seq(T_Label(label_else), T_Seq(T_Move(r, unEx(elsee)), joinjump));
 
-  return Tr_Ex(T_Eseq(T_Seq(unCx(condition).stm,T_Seq(stm_then,stm_else)),
+  return Tr_Ex(T_Eseq(T_Seq(condition_cx.stm,T_Seq(stm_then,stm_else)),
                       T_Eseq(T_Label(label_join),r)));
 
 }
@@ -421,13 +425,13 @@ Tr_exp Tr_whileExp(Tr_exp condition, Tr_exp body, Temp_label label_done){
   Temp_label label_test = Temp_newlabel();
 
   Temp_label label_body = Temp_newlabel();
-
-  doPatch(unCx(condition).trues,label_body);
-  doPatch(unCx(condition).falses,label_done);
+  struct Cx condition_cx = unCx(condition);
+  doPatch(condition_cx.trues,label_body);
+  doPatch(condition_cx.falses,label_done);
   T_stm jump_test = T_Jump(T_Name(label_test),Temp_LabelList(label_test,NULL));
 
   T_stm stm_body = T_Seq(T_Label(label_body),T_Seq(unNx(body),jump_test));
-  T_stm stm_test = T_Seq(T_Label(label_test),unCx(condition).stm);
+  T_stm stm_test = T_Seq(T_Label(label_test),condition_cx.stm);
   T_stm stm_done = T_Label(label_done);
 
   return Tr_Nx(T_Seq(stm_test,T_Seq(stm_body,stm_done)));
@@ -478,6 +482,12 @@ Tr_exp Tr_seqExp(Tr_expList trlist){
     seq = T_Seq(unNx(trlist->head),seq);
 
   return Tr_Ex(T_Eseq(seq, last_exp));
+}
+
+Tr_exp Tr_returnExp(Temp_temp rv, Tr_exp body, bool has_ret){
+  if(has_ret)
+    return Tr_Nx(T_Move(T_Temp(rv),unEx(body)));
+  return body;
 }
 
 void Tr_procEntryExit(Tr_level level, Tr_exp body,Tr_accessList formals){

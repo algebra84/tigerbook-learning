@@ -486,7 +486,8 @@ Tr_exp  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d,Temp_label b
       Ty_ty res = funentry->u.fun.result;
       if(!EqualTy(res,ret.ty))
         EM_error(func->body->pos,"conflict return type \n");
-      Tr_procEntryExit(funentry->u.fun.level,ret.exp,formals);
+      bool has_ret = (ret.ty != Ty_Void());
+      Tr_procEntryExit(funentry->u.fun.level,Tr_returnExp(F_RV(),ret.exp,has_ret),formals);
       S_endScope(venv);
     }
 
