@@ -34,4 +34,9 @@ add_executable(cc
         printtree.h
         tree.c
         tree.h
+        main.c
+        assem.c
+        assem.h
+        codegen.c
+        codegen.h
         venv.h escape.h escape.c translate.c translate.h)
