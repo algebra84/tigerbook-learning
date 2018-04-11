@@ -459,7 +459,7 @@ Tr_exp  transDec(S_table venv, S_table tenv, Tr_level level,A_dec d,Temp_label b
         Ty_ty field = tmp->head;
         formals = Ty_TyList(field,formals);
       }
-      Temp_label func_label = Temp_newlabel();
+      Temp_label func_label =  func->name;
       Tr_level new_level = Tr_newLevel(level,func_label,ublist);
       S_enter(local_venv,func->name,
               E_FunEntry(new_level,func_label,formals, res));
@@ -544,7 +544,7 @@ F_fragList SEM_transProg(A_exp prog){
   S_table tenv = E_base_tenv();
   // set fp register t100
   F_FP();
-  Tr_level level = Tr_newLevel(Tr_outermost(),Temp_newlabel(),NULL);
+  Tr_level level = Tr_newLevel(Tr_outermost(),Temp_namedlabel("main"),NULL);
   struct expty body = transExp(venv,tenv,level,prog,NULL);
   Tr_procEntryExit(level,body.exp,NULL);
   return Tr_getResult();

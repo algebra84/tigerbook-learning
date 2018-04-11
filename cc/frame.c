@@ -4,17 +4,21 @@
 #include "symbol.h"
 #include "temp.h"
 #include "tree.h"
+#include "assem.h"
 #include "frame.h"
 
 
 // registers
 static Temp_temp fp = NULL;
 static Temp_temp rv = NULL;
+static Temp_temp ip = NULL;
+static Temp_temp zero = NULL;
 const int F_wordSize = 4;
 
 typedef enum {inFrame, inReg} Accesstype;
 struct F_access_
-{Accesstype kind;
+{
+  Accesstype kind;
   union {
     int offset;
     /* InFrame */
@@ -60,7 +64,7 @@ F_accessList F_newlist(F_access head, F_accessList tail){
 
 F_frame F_newFrame(Temp_label name, U_boolList formals){
   F_frame p = checked_malloc(sizeof(*p));
-  p->size = 0;
+  p->size = 4;
   p->label = name;
   p->escapes = formals->tail;
   p->formals = NULL;
@@ -114,10 +118,21 @@ Temp_temp F_FP(void){
   return fp;
 }
 
+Temp_temp F_ZERO(void){
+  if(!zero)
+    zero = Temp_newtemp();
+  return zero;
+}
 Temp_temp F_RV(void){
   if(!rv)
     rv = Temp_newtemp();
   return rv;
+}
+
+Temp_temp F_IP(void){
+  if(!ip)
+    ip = Temp_newtemp();
+  return ip;
 }
 T_exp F_Exp(F_access acc,T_exp framePtr){
   if(acc->kind == inReg)
@@ -165,4 +180,19 @@ F_fragList F_FragList(F_frag head, F_fragList tail){
   p->head = head;
   p->tail = tail;
   return p;
+}
+
+static Temp_tempList returnSink = NULL;
+AS_instrList F_procEntryExit2(AS_instrList body) {
+  if (!returnSink) returnSink =
+                     Temp_TempList(F_ZERO(), Temp_TempList(F_FP(),
+                                                           Temp_TempList(F_IP(), NULL)));
+  return AS_splice(body, AS_InstrList(
+                                      AS_Oper("", NULL, returnSink, NULL), NULL));
+}
+
+AS_proc F_procEntryExit3(F_frame frame, AS_instrList body) {
+  char buf[100];
+  sprintf(buf,"PROCEDURE %s\n", S_name(F_name(frame)));
+  return AS_Proc(String(buf), body, "END\n");
 }

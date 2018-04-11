@@ -39,7 +39,8 @@ void EM_newline(void)
 }
 
 void EM_error(int pos, char *message,...)
-{va_list ap;
+{
+  va_list ap;
   IntList lines = linePos; 
   int num=lineNum;
  
@@ -59,9 +60,14 @@ void EM_error(int pos, char *message,...)
 
 void EM_reset(string fname)
 {
-  anyErrors=FALSE; fileName=fname; lineNum=1;
+  anyErrors=FALSE;
+  fileName=fname;
+  lineNum=1;
   linePos=intList(0,NULL);
   yyin = fopen(fname,"r");
-  if (!yyin) {EM_error(0,"cannot open"); exit(1);}
+  if (!yyin){
+    EM_error(0,"cannot open");
+    exit(1);
+  }
 }
 

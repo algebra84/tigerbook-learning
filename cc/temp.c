@@ -16,7 +16,8 @@
 struct Temp_temp_ {int num;};
 
 string Temp_labelstring(Temp_label s)
-{return S_name(s);
+{
+  return S_name(s);
 }
 
 static int labels = 0;

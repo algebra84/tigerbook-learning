@@ -50,7 +50,7 @@ S_table E_base_venv(){
   U_boolList ublist = NULL;
 
   // print(s:string)
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("print");
   ublist = U_BoolList(TRUE,NULL);
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   Ty_tyList formals = Ty_TyList(Ty_String(),NULL);
@@ -62,7 +62,7 @@ S_table E_base_venv(){
   //flush() function
   formals = NULL;
   ublist = NULL;
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("flush");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Void();
   func = E_FunEntry(new_level,func_label,
@@ -72,7 +72,7 @@ S_table E_base_venv(){
   //getchar() :string
   formals = NULL;
   ublist = NULL;
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("getchar");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
   func = E_FunEntry(new_level,func_label,
@@ -82,7 +82,7 @@ S_table E_base_venv(){
   // chr(i: int) :string
   formals = Ty_TyList(Ty_Int(), NULL);
   ublist = U_BoolList(TRUE,NULL);
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("chr");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
   func = E_FunEntry(new_level,func_label,
@@ -92,7 +92,7 @@ S_table E_base_venv(){
   //size(s:string) :int
   formals = Ty_TyList(Ty_String(), NULL);
   ublist = U_BoolList(TRUE, NULL);
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("size");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Int();
   func = E_FunEntry(new_level,func_label,
@@ -102,7 +102,7 @@ S_table E_base_venv(){
   //ord(s:string) :int
   formals = Ty_TyList(Ty_String(), NULL);
   ublist = U_BoolList(TRUE, NULL);
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("ord");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Int();
   func = E_FunEntry(new_level,func_label,
@@ -112,7 +112,7 @@ S_table E_base_venv(){
   //substring(s:string,first:int, n:int) :string
   formals = Ty_TyList(Ty_String(), Ty_TyList(Ty_Int(),Ty_TyList(Ty_Int(),NULL)));
   ublist = U_BoolList(TRUE, U_BoolList(TRUE, U_BoolList(TRUE, NULL)));
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("substring");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
   func = E_FunEntry(new_level,func_label,
@@ -122,7 +122,7 @@ S_table E_base_venv(){
   // concat(s1:string, s2:string):string
   formals = Ty_TyList(Ty_String(), Ty_TyList(Ty_String(),NULL));
   ublist = U_BoolList(TRUE, U_BoolList(TRUE, NULL));
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("concat");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_String();
   func = E_FunEntry(new_level,func_label,
@@ -131,7 +131,7 @@ S_table E_base_venv(){
   // not(i:integer):integer
   formals = Ty_TyList(Ty_Int(),NULL);
   ublist = U_BoolList(TRUE, NULL);
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("not");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Int();
   func = E_FunEntry(new_level,func_label,
@@ -140,7 +140,7 @@ S_table E_base_venv(){
   // exit(i:int)
   formals = Ty_TyList(Ty_Int(), NULL);
   ublist = U_BoolList(TRUE, NULL);
-  func_label = Temp_newlabel();
+  func_label = Temp_namedlabel("exit");
   new_level = Tr_newLevel(Tr_outermost(),func_label,ublist);
   result = Ty_Void();
   func = E_FunEntry(new_level,func_label,

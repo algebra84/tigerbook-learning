@@ -1,5 +1,7 @@
 #ifndef CC_SEMANT_H
 #define CC_SEMANT_H
+
+#include"types.h"
 struct expty {Tr_exp exp; Ty_ty ty;};
 
 struct expty expTy(Tr_exp exp, Ty_ty ty);

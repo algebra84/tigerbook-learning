@@ -1,5 +1,6 @@
 #ifndef CC_FRAME_H
 #define CC_FRAME_H
+#include "assem.h"
 typedef struct F_frame_ *F_frame;
 typedef struct F_access_ *F_access;
 typedef struct F_accessList_ *F_accessList;
@@ -7,11 +8,11 @@ typedef struct F_frag_ *F_frag;
 typedef struct F_fragList_ *F_fragList;
 typedef enum{F_stringFrag, F_procFrag} Fragkind;
 struct F_frag_ {
-    Fragkind kind;
-    union{struct {Temp_label label;
-                  string str;}stringg;
-          struct{T_stm body; F_frame frame;}proc;
-    }u;
+  Fragkind kind;
+  union{struct {Temp_label label;
+    string str;}stringg;
+    struct{T_stm body; F_frame frame;}proc;
+  }u;
 };
 
 struct F_fragList_ {F_frag head; F_fragList tail;};
@@ -26,6 +27,8 @@ F_accessList F_newlist(F_access head, F_accessList tail);
 /* chapter 7 */
 Temp_temp F_FP(void);
 Temp_temp F_RV(void);
+Temp_temp F_IP(void);
+Temp_temp F_ZERO(void);
 
 extern const int F_wordSize;
 
@@ -37,5 +40,7 @@ T_stm F_procEntryepi(F_frame frame, T_stm stm);
 F_frag F_StringFrag(Temp_label label, string str);
 F_frag F_ProcFrag(T_stm body, F_frame frame);
 F_fragList F_FragList(F_frag head, F_fragList tail);
+AS_instrList F_procEntryExit2(AS_instrList body);
+AS_proc F_procEntryExit3(F_frame frame, AS_instrList body);
 
 #endif // CC_FRAME_H
