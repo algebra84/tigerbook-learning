@@ -36,10 +36,12 @@ add_executable(cc
         tree.h
         main.c
         assem.c
+        assem.h
         graph.c
         graph.h
+        flowgraph.c
         flowgraph.h
-        assem.h
+
         codegen.c
         codegen.h
         venv.h escape.h escape.c translate.c translate.h)

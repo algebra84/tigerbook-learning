@@ -11,7 +11,7 @@ typedef struct G_nodeList_ *G_nodeList;
 struct G_nodeList_ { G_node head; G_nodeList tail;};
 
 /* Make a new graph */
-G_graph G_Graph(void); 
+G_graph G_Graph(void);
 /* Make a new node in graph "g", with associated "info" */
 G_node G_Node(G_graph g, void *info);
 

@@ -81,7 +81,8 @@ bool G_inNodeList(G_node a, G_nodeList l) {
 }
 
 void G_addEdge(G_node from, G_node to) {
-  assert(from);  assert(to);
+  assert(from);
+  assert(to);
   assert(from->mygraph == to->mygraph);
   if (G_goesTo(from, to))
     return;
