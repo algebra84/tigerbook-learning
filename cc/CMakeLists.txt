@@ -36,6 +36,9 @@ add_executable(cc
         tree.h
         main.c
         assem.c
+        graph.c
+        graph.h
+        flowgraph.h
         assem.h
         codegen.c
         codegen.h

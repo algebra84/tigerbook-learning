@@ -1,3 +1,5 @@
+#ifndef CC_GRAPH_H
+#define CC_GRAPH_H
 /*
  * graph.h - Abstract Data Type (ADT) for directed graphs
  */
@@ -23,14 +25,14 @@ G_nodeList G_nodes(G_graph g);
 bool G_inNodeList(G_node a, G_nodeList l);
 
 /* Make a new edge joining nodes "from" and "to", which must belong
-    to the same graph */
+   to the same graph */
 void G_addEdge(G_node from, G_node to);
 
 /* Delete the edge joining "from" and "to" */
 void G_rmEdge(G_node from, G_node to);
 
 /* Show all the nodes and edges in the graph, using the function "showInfo"
-    to print the name of each node */
+   to print the name of each node */
 void G_show(FILE *out, G_nodeList p, void showInfo(void *));
 
 /* Get all the successors of node "n" */
@@ -62,3 +64,5 @@ void G_enter(G_table t, G_node node, void *value);
 
 /* Tell what "node" maps to in table "t" */
 void *G_look(G_table t, G_node node);
+
+#endif
