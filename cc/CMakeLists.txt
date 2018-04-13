@@ -41,7 +41,8 @@ add_executable(cc
         graph.h
         flowgraph.c
         flowgraph.h
-
+        liveness.c
+        liveness.h
         codegen.c
         codegen.h
         venv.h escape.h escape.c translate.c translate.h)

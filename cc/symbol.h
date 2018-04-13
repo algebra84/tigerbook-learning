@@ -4,6 +4,7 @@
  * symbol.h - Symbols and symbol-tables
  *
  */
+#include "util.h"
 
 typedef struct S_symbol_ *S_symbol;
 

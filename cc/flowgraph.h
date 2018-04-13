@@ -3,6 +3,7 @@
 /*
  * flowgraph.h - Function prototypes to represent control flow graphs.
  */
+#include "assem.h"
 
 Temp_tempList FG_def(G_node n);
 Temp_tempList FG_use(G_node n);
