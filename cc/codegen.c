@@ -261,27 +261,27 @@ static void munchStm(T_stm s) {
     T_exp temp1 = T_Binop(T_minus, right,left);
     switch(s->u.CJUMP.op){
     case T_eq:
-      emit(AS_Oper("BRANCHEQ `s0, `j0",NULL,L(munchExp(temp),NULL),
+      emit(AS_Oper("BRANCHEQ `s0, `j0\n",NULL,L(munchExp(temp),NULL),
                    AS_Targets(Temp_LabelList(s->u.CJUMP.true,NULL))));
       break;
     case T_ne:
-      emit(AS_Oper("BRANCHNE `s0, `j0",NULL,L(munchExp(temp),NULL),
+      emit(AS_Oper("BRANCHNE `s0, `j0\n",NULL,L(munchExp(temp),NULL),
                    AS_Targets(Temp_LabelList(s->u.CJUMP.true,NULL))));
       break;
     case T_ge:
-      emit(AS_Oper("BRANCHGE `s0, `j0",NULL,L(munchExp(temp),NULL),
+      emit(AS_Oper("BRANCHGE `s0, `j0\n",NULL,L(munchExp(temp),NULL),
                    AS_Targets(Temp_LabelList(s->u.CJUMP.true,NULL))));
       break;
     case T_lt:
-      emit(AS_Oper("BRANCHLT `s0, `j0",NULL,L(munchExp(temp),NULL),
+      emit(AS_Oper("BRANCHLT `s0, `j0\n",NULL,L(munchExp(temp),NULL),
                    AS_Targets(Temp_LabelList(s->u.CJUMP.true,NULL))));
       break;
     case T_gt:
-      emit(AS_Oper("BRANCHLT `s0, `j0",NULL,L(munchExp(temp1),NULL),
+      emit(AS_Oper("BRANCHLT `s0, `j0\n",NULL,L(munchExp(temp1),NULL),
                    AS_Targets(Temp_LabelList(s->u.CJUMP.true,NULL))));
       break;
     case T_le:
-      emit(AS_Oper("BRANCHGT `s0, `j0",NULL,L(munchExp(temp1),NULL),
+      emit(AS_Oper("BRANCHGT `s0, `j0\n",NULL,L(munchExp(temp1),NULL),
                    AS_Targets(Temp_LabelList(s->u.CJUMP.true,NULL))));
       break;
     default:

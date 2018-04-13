@@ -65,4 +65,16 @@ void G_enter(G_table t, G_node node, void *value);
 /* Tell what "node" maps to in table "t" */
 void *G_look(G_table t, G_node node);
 
+/* the type of "tables" mapping temp_label to graphnodes*/
+typedef struct TAB_table_ *L_table;
+
+/* Make a new label */
+L_table L_empty(void);
+
+/* Enter the mapping "node"->"value" to the table "t" */
+void L_enter(L_table t, Temp_label label, void *value);
+
+/* Tell what "node" maps to in table "t" */
+void *L_look(L_table t, Temp_label node);
+
 #endif

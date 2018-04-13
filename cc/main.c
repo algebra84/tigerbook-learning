@@ -19,9 +19,16 @@
 #include "escape.h"
 #include "parse.h"
 #include "codegen.h"
+#include "graph.h"
+#include "flowgraph.h"
+
 
 extern bool anyErrors;
 extern Temp_map F_tempMap;
+
+void AS_print_wrap(void* i){
+  AS_print(stdout,i,Temp_layerMap(F_tempMap,Temp_name()));
+}
 
 /* print the assembly language instructions to filename.s */
 static void doProc(FILE *out, F_frame frame, T_stm body)
@@ -38,6 +45,10 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
   AS_printInstrList (out, iList,
                      Temp_layerMap(F_tempMap,Temp_name()));
   fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
+
+  // print cfg
+  G_graph  cfg = FG_AssemFlowGraph(iList);
+  G_show(stdout, G_nodes(cfg),NULL);
 }
 
 int main(int argc, string *argv)

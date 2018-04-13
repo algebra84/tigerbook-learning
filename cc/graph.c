@@ -114,10 +114,10 @@ void G_show(FILE *out, G_nodeList p, void showInfo(void *)) {
     assert(n);
     if (showInfo) 
       showInfo(n->info);
-    fprintf(out, " (%d): ", n->mykey); 
-    for(q=G_succ(n); q!=NULL; q=q->tail) 
-      fprintf(out, "%d ", q->head->mykey);
-    fprintf(out, "\n");
+    fprintf(out, " current: node %d\n    succ: ", n->mykey);
+    for(q=G_succ(n); q!=NULL; q=q->tail)
+      fprintf(out, "node %d ", q->head->mykey);
+    fprintf(out, "\n\n");
   }
 }
 
@@ -192,4 +192,15 @@ void *G_look(G_table t, G_node node){
   return TAB_look(t, node);
 }
 
+// label table functions
+L_table L_empty(void) {
+  return TAB_empty();
+}
 
+void L_enter(L_table t, Temp_label label, void *value){
+  TAB_enter(t,label, value);
+}
+
+void *L_look(L_table t, Temp_label node){
+  return TAB_look(t, node);
+}

@@ -1,5 +1,5 @@
-tcc:  parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o main.o codegen.o assem.o
-	cc -g parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o main.o codegen.o assem.o -o tcc
+tcc:  parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o main.o codegen.o assem.o graph.o flowgraph.o
+	cc -g parse.o y.tab.o lex.yy.o errormsg.o util.o symbol.o table.o absyn.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o main.o codegen.o assem.o graph.o flowgraph.o -o tcc
 
 parse.o: parse.c errormsg.h util.h
 	cc -g -c parse.c
@@ -76,5 +76,11 @@ codegen.o: codegen.c
 assem.o: assem.c
 	cc -g -c assem.c
 
-clean: 
-	rm -f tcc  util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o absyn.o parse.o symbol.o table.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o main.o codegen.o assem.o
+flowgraph.o: flowgraph.c
+	cc -g -c flowgraph.c
+
+graph.o: graph.c
+	cc -g -c graph.c
+
+clean:
+	rm -f tcc  util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o absyn.o parse.o symbol.o table.o prabsyn.o venv.o semant.o types.o frame.o escape.o translate.o temp.o tree.o printtree.o canon.o main.o codegen.o assem.o graph.o flowgraph.o
