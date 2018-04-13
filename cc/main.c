@@ -47,8 +47,10 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
   fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
 
   // print cfg
+  fprintf(stdout, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
   G_graph  cfg = FG_AssemFlowGraph(iList);
   G_show(stdout, G_nodes(cfg),NULL);
+  fprintf(stdout, "END %s\n\n", Temp_labelstring(F_name(frame)));
 }
 
 int main(int argc, string *argv)
