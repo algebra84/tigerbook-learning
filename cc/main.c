@@ -21,6 +21,7 @@
 #include "codegen.h"
 #include "graph.h"
 #include "flowgraph.h"
+#include "liveness.h"
 
 
 extern bool anyErrors;
@@ -49,7 +50,8 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
   // print cfg
   fprintf(stdout, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
   G_graph  cfg = FG_AssemFlowGraph(iList);
-  G_show(stdout, G_nodes(cfg),NULL);
+  struct Live_graph livegraph = Live_liveness(cfg);
+  G_show(stdout, G_nodes(livegraph.graph),NULL);
   fprintf(stdout, "END %s\n\n", Temp_labelstring(F_name(frame)));
 }
 

@@ -6,6 +6,7 @@
  */
 #include<stdio.h>
 #include "symbol.h"
+#include "table.h"
 
 typedef struct Temp_temp_ *Temp_temp;
 Temp_temp Temp_newtemp(void);
@@ -24,6 +25,8 @@ struct Temp_labelList_ { Temp_label head; Temp_labelList tail;};
 Temp_labelList Temp_LabelList(Temp_label h, Temp_labelList t);
 
 typedef struct Temp_map_ *Temp_map;
+struct Temp_map_ {TAB_table tab; Temp_map under;};
+
 Temp_map Temp_empty(void);
 Temp_map Temp_layerMap(Temp_map over, Temp_map under);
 void Temp_enter(Temp_map m, Temp_temp t, string s);
