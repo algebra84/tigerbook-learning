@@ -10,6 +10,7 @@
 
 typedef struct Temp_temp_ *Temp_temp;
 Temp_temp Temp_newtemp(void);
+int Temp_key(Temp_temp p);
 
 typedef struct Temp_tempList_ *Temp_tempList;
 struct Temp_tempList_ { Temp_temp head; Temp_tempList tail;};

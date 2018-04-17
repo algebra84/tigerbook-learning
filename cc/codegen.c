@@ -178,7 +178,7 @@ static Temp_temp munchExp(T_exp e) {
 
     Temp_tempList l = munchArgs(0,e->u.CALL.args);
     // none of callee save regs now. todo?
-    emit(AS_Oper("CALL `s0\n", NULL, L(funcname,l), NULL));
+    emit(AS_Oper("CALL `s0\n", L(F_RV(),NULL), L(funcname,l), NULL));
     return F_RV();
   }
   default:

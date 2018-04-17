@@ -65,6 +65,10 @@ G_node G_Node(G_graph g, void *info)
   return n;
 }
 
+int G_Nodekey(G_node node){
+  return node->mykey;
+}
+
 G_nodeList G_nodes(G_graph g)
 {
   assert(g);

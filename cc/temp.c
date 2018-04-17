@@ -45,6 +45,9 @@ Temp_temp Temp_newtemp(void)
   return p;
 }
 
+int Temp_key(Temp_temp p){
+  return p->num;
+}
 
 Temp_map Temp_name(void) {
   static Temp_map m = NULL;
